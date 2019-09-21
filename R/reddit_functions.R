@@ -1,6 +1,13 @@
-
-require(httr, quietly = TRUE)
-require(jsonlite, quietly = TRUE)
+#' Generate an access token for the Reddit API
+#'
+#' @param scope The scope of what you want to access. Must be one of these:
+#' identity, read, history, wikiread
+#' @param useragent The useragent for the device accessing the API
+#' @param username Username for the Reddit profile accessing the API
+#' @param password Password for the Reddit profile accessing the API
+#' @return A list containing the access token, the time until it expires, the
+#' scope, the time it was generated and the useragent
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 
 get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                        useragent,
@@ -10,22 +17,23 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
   if(!scope %in% c("identity", "read", "history", "wikiread")) stop("Invalid scope")
 
 
-  token <- POST("https://www.reddit.com/api/v1/access_token",
-                body = list(
-                  grant_type = "password",
-                  username = username,
-                  password = password,
-                  scope = scope),
-                encode = "form",
-                authenticate("cTExHaVDTw05uQ", "hwoARWG2b5Q-rBD03kFEeRu6aRw"),
-                user_agent(useragent)
+  token <- httr::POST(url = "https://www.reddit.com/api/v1/access_token",
+                      body = list(
+                        grant_type = "password",
+                        username = username,
+                        password = password,
+                        scope = scope),
+                      encode = "form",
+                      httr::authenticate("cTExHaVDTw05uQ", "hwoARWG2b5Q-rBD03kFEeRu6aRw"),
+                      httr::user_agent(useragent)
   )
 
-  stop_for_status(token)
+  httr::stop_for_status(token)
 
-  acc_token <- content(token)
+  acc_token <- httr::content(token)
 
   access_time <- Sys.time()
+
   acc_token <- c(acc_token,
                  access_time = access_time,
                  useragent = useragent)
@@ -33,6 +41,42 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
   return (acc_token)
 }
 
+#' Get posts from a specified subreddit
+#'
+#' @param subreddit The name of the subreddit from which posts are requested.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param sort The order in which the posts in the subreddit should be ordered
+#' when accessing them. Possible values are:
+#' \itemize{
+#'   \item \code{new}: Sorts posts by the time when they were created
+#'   \item \code{hot}: Sorts posts by posts currently
+#'   \item \code{controversial}:
+#'   \item \code{random}:
+#'   \item \code{rising}:
+#'   \item \code{top}: Most upvoted posts in a certain timeframe. Timeframe can
+#'   be specified with \code{time}.
+#' }
+#' @param limit The maximum number of posts to return. Must be a number between
+#' 1 and 100.
+#' @param time The timeframe for the \code{sort} order \code{controversial} and
+#' \code{top}. Possible values are:
+#' \itemize{
+#'   \item \code{hour}
+#'   \item \code{day}
+#'   \item \code{week}
+#'   \item \code{month}
+#'   \item \code{year}
+#'   \item \code{all time}
+#' }
+#' @param before The fullname of a post serving as anchor in the request.
+#' Posts before this post in the listing are returned.
+#' @param after The fullname of a post serving as anchor in the request.
+#' Posts after this post in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#' @return A dataframe containg the requested posts
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 
 get_posts <- function (subreddit,
                        accesstoken,
@@ -95,15 +139,15 @@ get_posts <- function (subreddit,
 
   auth <- paste("bearer", accesstoken$access_token)
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as="text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
   posts <- as.data.frame(result$data$children)
 
@@ -151,6 +195,42 @@ get_posts <- function (subreddit,
 }
 
 
+#' Get submissions for a specified user
+#'
+#' @param user The username of the user for which submissions are requested.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"history"}.
+#' @param sort The order in which the submissions of the user should be ordered
+#' when accessing them. Possible values are:
+#' \itemize{
+#'   \item \code{new}: Sorts posts by the time when they were created
+#'   \item \code{hot}: Sorts posts by posts currently trending
+#'   \item \code{controversial}: Sorts posts by number of upvotes and downvotes
+#'   \item \code{top}: Most upvoted posts in a certain timeframe. Timeframe can
+#'   be specified with \code{time}.
+#' }
+#' @param time The timeframe for the \code{sort} order \code{controversial} and
+#' \code{top}. Possible values are:
+#' \itemize{
+#'   \item \code{hour}
+#'   \item \code{day}
+#'   \item \code{week}
+#'   \item \code{month}
+#'   \item \code{year}
+#'   \item \code{all time}
+#' }
+#' @param limit The maximum number of submissions to return. Must be a number
+#' between 1 and 100.
+#' @param before The fullname of a post serving as anchor in the request.
+#' Posts before this post in the listing are returned.
+#' @param after The fullname of a post serving as anchor in the request.
+#' Posts after this post in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe of posts for a specified user.
+#' @export
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 
 
 get_submissions <- function (user,
@@ -210,16 +290,16 @@ get_submissions <- function (user,
 
   auth <- paste("bearer", accesstoken$access_token)
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent)
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent)
   )
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as="text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
   submissions <- as.data.frame(result$data$children)
 
@@ -243,7 +323,24 @@ get_submissions <- function (user,
 
 
 
-get_comments <- function (sub,
+#' Get comments from a specified subreddit
+#'
+#' @param subreddit The name of the subreddit from which comments are requested
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param limit The maximum number of comments to return. Must be a number
+#' between 1 and 100.
+#' @param before The fullname of a comment serving as anchor in the request.
+#' Comments before this comment in the listing are returned.
+#' @param after The fullname of a comment serving as anchor in the request.
+#' Comments after this comment in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe with new comments from a specified subreddit.
+#' @export
+
+get_comments <- function (subreddit,
                           accesstoken,
                           limit=100,
                           before=NULL,
@@ -264,12 +361,12 @@ get_comments <- function (sub,
   #make link
   if(is.null(before) & !is.null(after)){
 
-    link <- paste0("https://oauth.reddit.com/r/", sub,
+    link <- paste0("https://oauth.reddit.com/r/", subreddit,
                    "/comments/.json?limit=", limit, "&after=", after)
 
   } else if (!is.null(before) & is.null(after)) {
 
-    link <- paste0("https://oauth.reddit.com/r/", sub,
+    link <- paste0("https://oauth.reddit.com/r/", subreddit,
                    "/comments/.json?limit=", limit, "&before=", before)
 
   } else if(!is.null(before) & !is.null(after)){
@@ -279,22 +376,22 @@ get_comments <- function (sub,
   } else if(is.null(before) & is.null(after)){
 
     link <- paste0("https://oauth.reddit.com/r/",
-                   sub, "/comments/.json?limit=", limit)
+                   subreddit, "/comments/.json?limit=", limit)
   }
 
   if(verbose == TRUE) print(paste("Getting data from",link, collapse=":"))
 
   auth <- paste("bearer", accesstoken$access_token)
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as = "text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
 
   comments <- result$data$children
 
@@ -319,14 +416,52 @@ get_comments <- function (sub,
 }
 
 
-get_user_comms <- function (user,
-                            accesstoken=NULL,
-                            sort = "new",
-                            time = NULL,
-                            limit = 100,
-                            after=NULL,
-                            before=NULL,
-                            verbose = FALSE) {
+#' Get comments from a specified user
+#'
+#' @param user The username of the user for which comments are requested.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"history"}.
+#' @param sort The order in which the submissions of the user should be ordered
+#' when accessing them. Possible values are:
+#' \itemize{
+#'   \item \code{new}: Returns newest comments
+#'   \item \code{hot}: Returns highly upvoted comments currently
+#'   \item \code{controversial}: Returns comments that received a lot of upvotes
+#'   and downvotes
+#'   \item \code{top}: Returns most upvoted comments in a certain timeframe.
+#'   Timeframe can be specified with \code{time}.
+#' }
+#' @param time The timeframe for the \code{sort} order \code{controversial} and
+#' \code{top}. Possible values are:
+#' \itemize{
+#'   \item \code{hour}
+#'   \item \code{day}
+#'   \item \code{week}
+#'   \item \code{month}
+#'   \item \code{year}
+#'   \item \code{all time}
+#' }
+#' @param limit The maximum number of user comments to return. Must be a number
+#' between 1 and 100.
+#' @param before The fullname of a comment serving as anchor in the request.
+#' Comments before this comment in the listing are returned.
+#' @param after The fullname of a comment serving as anchor in the request.
+#' Comments after this comment in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe of comments for the specified user.
+#' @export
+
+
+get_user_comments <- function (user,
+                               accesstoken=NULL,
+                               sort = "new",
+                               time = NULL,
+                               limit = 100,
+                               after=NULL,
+                               before=NULL,
+                               verbose = FALSE) {
 
   require(httr, quietly = TRUE)
   require(jsonlite, quietly = TRUE)
@@ -376,15 +511,15 @@ get_user_comms <- function (user,
 
   auth <- paste("bearer", accesstoken$access_token)
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as="text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
   if (length(result$data$children) > 0) {
 
@@ -410,91 +545,58 @@ get_user_comms <- function (user,
 }
 
 
-get_overview <- function (user,
-                          accesstoken,
-                          sort = "new",
-                          limit = 100,
-                          before=NULL,
-                          after=NULL,
-                          verbose = FALSE) {
-
-  #Catching errors
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope!="history") stop("This function requires 'history' as scope of the token")
-  }
-
-  if(is.null(user)) stop("No user was specified")
-
-  if(!is.numeric(limit)) stop("limit has to be a number")
-
-  if(limit > 100 | limit < 1) stop("limit has to be a number between 1 and 100")
-
-
-  if(is.null(before) & !is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/overview/", ".json?limit=", limit,"&sort=", sort, "&after=", after)
-
-  } else if (!is.null(before) & is.null(after)) {
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/overview/", ".json?limit=", limit,"&sort=", sort, "&before=", before)
-
-  } else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/overview/", ".json?limit=", limit,"&sort=", sort)
-  }
-
-  if(verbose == TRUE) print(paste("Getting data from", link, collapse=":"))
-
-  auth <- paste("bearer", accesstoken$access_token)
-
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
-
-  stop_for_status(request)
-
-  if(verbose == TRUE) print(http_status(request)$message)
-
-  result <- jsonlite::fromJSON(content(request, as="text"), flatten = TRUE)
-
-  submissions <- as.data.frame(result$data$children)
-
-  if (nrow(submissions)>0) {
-
-    names(submissions) <- sub("data.", "", names(submissions))
-
-    if(!is.null(result$data$after)){
-      name_after <<- result$data$after
-    } else {
-      name_after <<- NULL
-    }
-
-    name_before <<- submissions[order(submissions$created, decreasing = T),"name"][1]
-
-    if(verbose == TRUE) print(paste(nrow(submissions),"submissions retrieved from reddit."))
-
-    return(submissions)
-  } else {print("No submissions available for this user")}
-}
-
+#' Get posts and comments from a specified user
+#'
+#' @param user The username of the user for which posts and comments are
+#' requested.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"history"}.
+#' @param type The category that is requested for the user. Possible values
+#' are:
+#' \itemize{
+#'   \item \code{overview}
+#'   \item \code{comments}
+#'   \item \code{submitted}
+#'   \item \code{gilded}
+#'   }
+#' @param sort The order in which the posts or comments of the user should be
+#' ordered when accessing them. Possible values are:
+#' \itemize{
+#'   \item \code{new}: Returns newest comments or posts
+#'   \item \code{hot}: Returns highly upvoted comments or posts currently
+#'   \item \code{controversial}: Returns comments or posts that received a lot
+#'   of upvotes and downvotes in a certain imeframe.Timeframe can be specified
+#'   with \code{time}.
+#'   \item \code{top}: Returns most upvoted comments posts in a certain
+#'   timeframe.Timeframe can be specified with \code{time}.
+#' }
+#' @param time The timeframe for the \code{sort} order \code{"controversial"}
+#' and \code{"top"}. Possible values are:
+#' \itemize{
+#'   \item \code{hour}
+#'   \item \code{day}
+#'   \item \code{week}
+#'   \item \code{month}
+#'   \item \code{year}
+#'   \item \code{all} for items from day the user registered their account to
+#'   today.
+#' }
+#' @param limit The maximum number of items to return. Must be a number between
+#' 1 and 100.
+#' @param before The fullname of an item serving as anchor in the
+#' request. Items before this item in the listing are returned.
+#' @param after The fullname of an item serving as anchor in the request.
+#' Items after this item in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe of posts or comments for the specified user.
+#' @export
 
 
 get_user <- function (user,
                       accesstoken,
-                      result = c("overview", "comments", "submitted", "gilded"),
+                      type = c("overview", "comments", "submitted", "gilded"),
                       sort = "new",
                       time = NULL,
                       limit = 100,
@@ -517,10 +619,10 @@ get_user <- function (user,
 
   if(limit > 100 | limit < 1) stop("limit has to be a number between 1 and 100")
 
-  if(is.null(result)) stop("No result specified")
+  if(is.null(type)) stop("No type specified")
 
-  if(!result %in% c("overview", "comments", "submitted", "gilded"))
-    stop("Result has to be one of these: overview, comments, submitted, gilded")
+  if(!type %in% c("overview", "comments", "submitted", "gilded"))
+    stop("type has to be one of these: overview, comments, submitted, gilded")
 
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
@@ -529,13 +631,13 @@ get_user <- function (user,
   if(is.null(before) & !is.null(after)){
 
     link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/", result,  "/.json?limit=", limit,
+                   "/", type,  "/.json?limit=", limit,
                    "&sort=", sort, "&after=", after, "&t=", time)
 
   } else if (!is.null(before) & is.null(after)) {
 
     link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/", result,  "/.json?limit=", limit,
+                   "/", type,  "/.json?limit=", limit,
                    "&sort=", sort, "&before=", before, "&t=", time)
 
   } else if(!is.null(before) & !is.null(after)){
@@ -545,22 +647,22 @@ get_user <- function (user,
   } else if(is.null(before) & is.null(after)){
 
     link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/", result,  "/.json?limit=", limit,"&sort=", sort,"&t=", time)
+                   "/", type,  "/.json?limit=", limit,"&sort=", sort,"&t=", time)
   }
 
   if(verbose == TRUE) print(paste("Getting data from", link, collapse=":"))
 
   auth <- paste("bearer", accesstoken$access_token)
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  response <- jsonlite::fromJSON(content(request, as="text"), flatten = TRUE)
+  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
   result <- as.data.frame(response$data$children)
 
@@ -576,11 +678,23 @@ get_user <- function (user,
 
     name_before <<- result[order(result$created, decreasing = T),"name"][1]
 
-    if(verbose == TRUE) print(paste(nrow(result),"result retrieved from reddit."))
+    if(verbose == TRUE) print(paste(nrow(result),"items retrieved from reddit."))
 
     return(result)
   } else {print("No result available for this user")}
 }
+
+
+#' Get basic information about account for a specified user
+#'
+#' @param user Username of the Reddit user that is requested.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe with information about a specified user.
+#' @export
 
 
 get_user_info <- function (user = NULL,
@@ -605,15 +719,15 @@ get_user_info <- function (user = NULL,
 
   if(verbose == TRUE) print(paste("Getting user info from: ", link))
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as="text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
   user_info <- as.data.frame(result$data[-15])
 
@@ -622,7 +736,35 @@ get_user_info <- function (user = NULL,
 
 
 
+#' Get basic information for a specified subreddit.
+#'
+#' @param subreddit Name of the subreddit for which info is requested.
+#' @param type Which info is requested. Possible values are \code{info} for
+#' information about the subreddit from the sidebar and \code{moderators} for
+#' the moderators of the subreddit.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe with basic information about a subreddit from the
+#' sidebar or a datafmre with information about the moderators of the subreddit.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' read_token <- get_token(scope = "read",
+#'                                       useragent = useragent,
+#'                                       username = username,
+#'                                       password = password)
+#'
+#' sub_info <- get_subreddit_info(subreddit = "soccer",
+#'                                accesstoken = read_token,
+#'                                verbose = FALSE)
+#'                                }
+
 get_subreddit_info <- function (subreddit = NULL,
+                                type = c("info", "moderators"),
                                 accesstoken = NULL,
                                 verbose = FALSE) {
 
@@ -638,27 +780,54 @@ get_subreddit_info <- function (subreddit = NULL,
 
   if(is.null(subreddit)) stop("No subreddit was specified")
 
-  link <- paste0("https://oauth.reddit.com/r/", subreddit, "/about.json")
+  if(type == "info") {
+
+    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/about.json")
+
+  } else if(type == "moderators"){
+
+    link <- paste0("https://oauth.reddit.com/r/", subreddit,
+                   "/about/moderators.json")
+
+  } else stop("Result has to be 'info' or 'moderators'")
 
   if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
 
   auth <- paste("bearer", accesstoken$access_token)
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as = "text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
 
-  sub_info <- result$data
+  if(type == "info") sub_info <- result$data
+  else if (type == "moderators") sub_info <- result$data$children
 
   return(sub_info)
 }
 
+
+#' Get wiki pages for a specified subreddit.
+#'
+#' @param subreddit Name of the subreddit for which wiki pages are requested.
+#' @param page Name of the requested page. If \code{"page"} is \code{"all"},
+#' all wiki pages for the subreddit are returned.
+#' @param accesstoken The access token required to access the endpoint. Scope of
+#' the access token must be \code{"wikiread"}.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A list containg the text of the page and all revisions.
+#' If  \code{"page"} is \code{"all"}, a character vector containg the names of
+#' all wiki pages.
+#' @export
+#'
+#' @seealso \code{\link{get_subreddit_info}}
 
 get_wiki <- function (subreddit = NULL,
                       page = "all",
@@ -679,20 +848,24 @@ get_wiki <- function (subreddit = NULL,
 
   auth <- paste("bearer", accesstoken$access_token)
 
-  link <- paste0("https://oauth.reddit.com/r/", subreddit, "/wiki/pages")
-
+  if(page == "all"){
+    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/wiki/pages")
+  } else{
+    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/wiki/", page)
+  }
 
   if(verbose == TRUE) print(paste("Getting wiki from", link))
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as = "text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as = "text"),
+                               flatten = T)
 
   wiki <- result$data
 
@@ -701,6 +874,18 @@ get_wiki <- function (subreddit = NULL,
 
 
 
+
+#' Get trophies for a specified user
+#'
+#' @param user The username of the user
+#' @param accesstoken The access token required to access the endpoint. Scope of
+#' the acces token must be \code{"read"}.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe with all trophies a specified user has received.
+#' @export
+#' @seealso \code{\link{get_user_info}}
 
 get_trophies <- function (user = NULL,
                           accesstoken=NULL,
@@ -723,17 +908,18 @@ get_trophies <- function (user = NULL,
 
   if(verbose == TRUE) print(paste("Getting trophies from:", link))
 
-  request <- GET(link,
-                 add_headers(Authorization = auth),
-                 user_agent(accesstoken$useragent))
+  request <- httr::GET(link,
+                 httr::add_headers(Authorization = auth),
+                 httr::user_agent(accesstoken$useragent))
 
-  stop_for_status(request)
+  httr::stop_for_status(request)
 
-  if(verbose == TRUE) print(http_status(request)$message)
+  if(verbose == TRUE) print(httr::http_status(request)$message)
 
-  result <- jsonlite::fromJSON(content(request, as="text"), flatten = TRUE)
+  result <- jsonlite::fromJSON(httr::content(request, as="text"),
+                               flatten = FALSE)
 
-  trophies <- as.data.frame(result$data$trophies)
+  trophies <- as.data.frame(result$data$trophies$data)
 
   return(trophies)
 }
