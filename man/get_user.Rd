@@ -15,13 +15,13 @@ requested.}
 \item{accesstoken}{The accesstoken required to access the endpoint. Scope
 must be \code{"history"}.}
 
-\item{type}{The category that is requested for the user. Possible values
-are:
+\item{type}{The type of content that is requested for the user. Possible
+valuesare:
 \itemize{
-  \item \code{overview}
-  \item \code{comments}
-  \item \code{submitted}
-  \item \code{gilded}
+  \item \code{overview} Contains posts and comments.
+  \item \code{comments} Only comments.
+  \item \code{submitted} Only posts.
+  \item \code{gilded} Posts and comments that have received awards.
   }}
 
 \item{sort}{The order in which the posts or comments of the user should be
