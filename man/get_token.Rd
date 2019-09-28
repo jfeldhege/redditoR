@@ -25,5 +25,6 @@ scope, the time it was generated and the useragent
 Generate an access token for the Reddit API
 }
 \details{
+Access tokens are only valid for an hour.
 More info at \url{https://www.reddit.com/dev/api/}
 }
