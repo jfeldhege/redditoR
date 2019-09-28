@@ -7,7 +7,8 @@
 #' @param password Password for the Reddit profile accessing the API
 #' @return A list containing the access token, the time until it expires, the
 #' scope, the time it was generated and the useragent
-#' @details More info at \url{https://www.reddit.com/dev/api/}
+#' @details Access tokens are only valid for an hour.
+#' More info at \url{https://www.reddit.com/dev/api/}
 
 get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                        useragent,
@@ -551,13 +552,13 @@ get_user_comments <- function (user,
 #' requested.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"history"}.
-#' @param type The category that is requested for the user. Possible values
-#' are:
+#' @param type The type of content that is requested for the user. Possible
+#' valuesare:
 #' \itemize{
-#'   \item \code{overview}
-#'   \item \code{comments}
-#'   \item \code{submitted}
-#'   \item \code{gilded}
+#'   \item \code{overview} Contains posts and comments.
+#'   \item \code{comments} Only comments.
+#'   \item \code{submitted} Only posts.
+#'   \item \code{gilded} Posts and comments that have received awards.
 #'   }
 #' @param sort The order in which the posts or comments of the user should be
 #' ordered when accessing them. Possible values are:
@@ -740,15 +741,16 @@ get_user_info <- function (user = NULL,
 #'
 #' @param subreddit Name of the subreddit for which info is requested.
 #' @param type Which info is requested. Possible values are \code{info} for
-#' information about the subreddit from the sidebar and \code{moderators} for
-#' the moderators of the subreddit.
+#' information about the subreddit from the sidebar, \code{moderators} for
+#' the moderators of the subreddit and \code{rules} for the rules of the
+#' subreddit.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"read"}.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #'
 #' @return A dataframe with basic information about a subreddit from the
-#' sidebar or a datafmre with information about the moderators of the subreddit.
+#' sidebar or a dataframe with the moderators or the rules of the subreddif.
 #' @export
 #'
 #' @examples
@@ -764,7 +766,7 @@ get_user_info <- function (user = NULL,
 #'                                }
 
 get_subreddit_info <- function (subreddit = NULL,
-                                type = c("info", "moderators"),
+                                type = c("info", "moderators", "rules"),
                                 accesstoken = NULL,
                                 verbose = FALSE) {
 
@@ -784,12 +786,12 @@ get_subreddit_info <- function (subreddit = NULL,
 
     link <- paste0("https://oauth.reddit.com/r/", subreddit, "/about.json")
 
-  } else if(type == "moderators"){
+  } else if(type == "moderators"|type == "rules"){
 
     link <- paste0("https://oauth.reddit.com/r/", subreddit,
-                   "/about/moderators.json")
+                   "/about/", type, ".json")
 
-  } else stop("Result has to be 'info' or 'moderators'")
+  } else stop("Result has to be 'info', 'moderators' or 'rules'.")
 
   if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
 
@@ -807,6 +809,7 @@ get_subreddit_info <- function (subreddit = NULL,
 
   if(type == "info") sub_info <- result$data
   else if (type == "moderators") sub_info <- result$data$children
+  else if (type == "rules") sub_info <- result$rules
 
   return(sub_info)
 }
@@ -925,3 +928,100 @@ get_trophies <- function (user = NULL,
 }
 
 
+
+
+#' Get a list of subreddits
+#'
+#' @param type The type of list that is requested. Possible values are:
+#' \itemize{
+#'   \item \code{popular} Subreddits that are popular right now
+#'   \item \code{new} Newly created subreddits
+#'   \item \code{default} Default subreddits that users are subscribed to when
+#'   they sign up for reddit.
+#'   }
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param limit The maximum number of subreddits to return. Must be a number
+#' between 1 and 100.
+#' @param before The fullname of an item serving as anchor in the
+#' request. Items before this item in the listing are returned.
+#' @param after The fullname of an item serving as anchor in the request.
+#' Items after this item in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe of subreddits.
+#' @export
+#'
+
+get_subreddits <- function (type = c("popular", "new", "default"),
+                            accesstoken = NULL,
+                            limit = 100,
+                            after = NULL,
+                            before = NULL,
+                            verbose = FALSE) {
+
+  if(is.null(accesstoken)){
+    stop("No token was specified")
+  }else {
+    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
+
+    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
+
+    if(accesstoken$scope != "read") stop("This function requires 'read' as scope of the token")
+  }
+
+  if(!type %in% c("popular", "new", "default"))
+    stop("type has to be one of these: popular, new, default")
+
+  if(!is.null(after) & is.null(before)){
+
+    link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
+                   limit, "&after=", after)
+
+  } else if(is.null(after) & !is.null(before)){
+
+    link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
+                   limit, "&before=", before)
+
+  }else if(!is.null(before) & !is.null(after)){
+
+    stop ('Only one of "before" or "after" should be specified')
+
+  } else if(is.null(before) & is.null(after)){
+
+    link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
+                   limit)
+  }
+
+  if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
+
+  auth <- paste("bearer", accesstoken$access_token)
+
+  request <- httr::GET(link,
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
+
+  httr::stop_for_status(request)
+
+  if(verbose == TRUE) print(httr::http_status(request)$message)
+
+  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
+
+  subreddits <- response$data$children
+
+  if(nrow(subreddits)>0){
+
+    names(subreddits) <- sub("data.", "", names(subreddits))
+
+    if(!is.null(response$data$after)){
+      subreddits_after <<- response$data$after
+    } else {
+      subreddits_after <<- NULL
+    }
+
+    subreddits_before <<- subreddits$name[order(subreddits$created, decreasing = T)][1]
+
+    return(subreddits)
+  } else {print("No subreddits available")}
+}
