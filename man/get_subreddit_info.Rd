@@ -4,15 +4,16 @@
 \alias{get_subreddit_info}
 \title{Get basic information for a specified subreddit.}
 \usage{
-get_subreddit_info(subreddit = NULL, type = c("info", "moderators"),
-  accesstoken = NULL, verbose = FALSE)
+get_subreddit_info(subreddit = NULL, type = c("info", "moderators",
+  "rules"), accesstoken = NULL, verbose = FALSE)
 }
 \arguments{
 \item{subreddit}{Name of the subreddit for which info is requested.}
 
 \item{type}{Which info is requested. Possible values are \code{info} for
-information about the subreddit from the sidebar and \code{moderators} for
-the moderators of the subreddit.}
+information about the subreddit from the sidebar, \code{moderators} for
+the moderators of the subreddit and \code{rules} for the rules of the
+subreddit.}
 
 \item{accesstoken}{The accesstoken required to access the endpoint. Scope
 must be \code{"read"}.}
@@ -22,7 +23,7 @@ should be printed to the console.}
 }
 \value{
 A dataframe with basic information about a subreddit from the
-sidebar or a datafmre with information about the moderators of the subreddit.
+sidebar or a dataframe with the moderators or the rules of the subreddif.
 }
 \description{
 Get basic information for a specified subreddit.
