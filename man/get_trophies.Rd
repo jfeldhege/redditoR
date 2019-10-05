@@ -4,7 +4,7 @@
 \alias{get_trophies}
 \title{Get trophies for a specified user}
 \usage{
-get_trophies(user = NULL, accesstoken = NULL, verbose = FALSE)
+get_trophies(user, accesstoken, verbose = FALSE)
 }
 \arguments{
 \item{user}{The username of the user}
