@@ -4,9 +4,8 @@
 \alias{get_user_comments}
 \title{Get comments from a specified user}
 \usage{
-get_user_comments(user, accesstoken = NULL, sort = "new",
-  time = NULL, limit = 100, after = NULL, before = NULL,
-  verbose = FALSE)
+get_user_comments(user, accesstoken, sort = "new", time = NULL,
+  limit = 100, after = NULL, before = NULL, verbose = FALSE)
 }
 \arguments{
 \item{user}{The username of the user for which comments are requested.}
