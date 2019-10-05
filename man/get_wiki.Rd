@@ -4,7 +4,7 @@
 \alias{get_wiki}
 \title{Get wiki pages for a specified subreddit.}
 \usage{
-get_wiki(subreddit = NULL, page = "all", accesstoken = NULL,
+get_wiki(subreddit = NULL, page = "all", accesstoken,
   verbose = FALSE)
 }
 \arguments{
