@@ -4,9 +4,8 @@
 \alias{get_subreddits}
 \title{Get a list of subreddits}
 \usage{
-get_subreddits(type = c("popular", "new", "default"),
-  accesstoken = NULL, limit = 100, after = NULL, before = NULL,
-  verbose = FALSE)
+get_subreddits(type = c("popular", "new", "default"), accesstoken,
+  limit = 100, after = NULL, before = NULL, verbose = FALSE)
 }
 \arguments{
 \item{type}{The type of list that is requested. Possible values are:
