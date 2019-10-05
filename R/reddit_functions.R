@@ -93,17 +93,7 @@ get_posts <- function (subreddit,
                        before = NULL,
                        verbose = TRUE) {
 
-  #catching errors
-
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope != "read")stop("This function requires 'read' as scope of the token")
-  }
+  check_token(accesstoken, scope = "read")
 
   if(!is.numeric(limit)) stop("limit has to be a number")
 
@@ -116,12 +106,10 @@ get_posts <- function (subreddit,
   #make link
   if(is.null(before) & !is.null(after)){
 
-
     link <- paste0("https://oauth.reddit.com/r/", subreddit, "/", sort,
                    ".json?limit=", limit, "&after=", after, "&t=", time)
 
   } else if (!is.null(before) & is.null(after)) {
-
 
     link <- paste0("https://oauth.reddit.com/r/", subreddit, "/", sort,
                    ".json?limit=", limit, "&before=", before, "&t=", time)
@@ -243,16 +231,7 @@ get_submissions <- function (user,
                              after = NULL,
                              verbose = FALSE) {
 
-  #Catching errors
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope!="history") stop("This function requires 'history' as scope of the token")
-  }
+  check_token(accesstoken, scope = "history")
 
   if(is.null(user)) stop("No user was specified")
 
@@ -348,18 +327,8 @@ get_comments <- function (subreddit,
                           after=NULL,
                           verbose = FALSE) {
 
-  #Catching errors
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
+  check_token(accesstoken, scope = "read")
 
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope!="read") stop("This function requires 'read' as scope of the token")
-  }
-
-  #make link
   if(is.null(before) & !is.null(after)){
 
     link <- paste0("https://oauth.reddit.com/r/", subreddit,
@@ -456,7 +425,7 @@ get_comments <- function (subreddit,
 
 
 get_user_comments <- function (user,
-                               accesstoken=NULL,
+                               accesstoken,
                                sort = "new",
                                time = NULL,
                                limit = 100,
@@ -464,18 +433,7 @@ get_user_comments <- function (user,
                                before=NULL,
                                verbose = FALSE) {
 
-  require(httr, quietly = TRUE)
-  require(jsonlite, quietly = TRUE)
-
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope!="history") stop("This function requires 'history' as scope of the token")
-  }
+  check_token(accesstoken, scope = "history")
 
   if(is.null(user)) stop("No user was specified")
 
@@ -485,7 +443,6 @@ get_user_comments <- function (user,
 
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
-
 
   if(is.null(before) & !is.null(after)){
 
@@ -605,16 +562,7 @@ get_user <- function (user,
                       after=NULL,
                       verbose = FALSE) {
 
-  #Catching errors
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope!="history") stop("This function requires 'history' as scope of the token")
-  }
+  check_token(accesstoken, scope = "history")
 
   if(!is.numeric(limit)) stop("limit has to be a number")
 
@@ -702,15 +650,7 @@ get_user_info <- function (user = NULL,
                            accesstoken=NULL,
                            verbose = FALSE) {
 
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope != "read") stop("This function requires 'read' as scope of the token")
-  }
+  check_token(accesstoken, scope = "read")
 
   if(is.null(user)) stop("No user was specified")
 
@@ -770,15 +710,7 @@ get_subreddit_info <- function (subreddit = NULL,
                                 accesstoken = NULL,
                                 verbose = FALSE) {
 
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope != "read") stop("This function requires 'read' as scope of the token")
-  }
+  check_token(accesstoken, scope = "read")
 
   if(is.null(subreddit)) stop("No subreddit was specified")
 
@@ -834,18 +766,10 @@ get_subreddit_info <- function (subreddit = NULL,
 
 get_wiki <- function (subreddit = NULL,
                       page = "all",
-                      accesstoken = NULL,
+                      accesstoken,
                       verbose = FALSE) {
 
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope != "wikiread") stop("This function requires 'wikiread' as scope of the token")
-  }
+  check_token(accesstoken, scope = "wikiread")
 
   if(is.null(subreddit)) stop("No subreddit was specified")
 
@@ -877,7 +801,6 @@ get_wiki <- function (subreddit = NULL,
 
 
 
-
 #' Get trophies for a specified user
 #'
 #' @param user The username of the user
@@ -890,19 +813,11 @@ get_wiki <- function (subreddit = NULL,
 #' @export
 #' @seealso \code{\link{get_user_info}}
 
-get_trophies <- function (user = NULL,
-                          accesstoken=NULL,
+get_trophies <- function (user,
+                          accesstoken,
                           verbose = FALSE) {
 
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope != "read") stop("This function requires 'read' as scope of the token")
-  }
+  check_token(accesstoken, scope = "read")
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -926,7 +841,6 @@ get_trophies <- function (user = NULL,
 
   return(trophies)
 }
-
 
 
 
@@ -955,21 +869,13 @@ get_trophies <- function (user = NULL,
 #'
 
 get_subreddits <- function (type = c("popular", "new", "default"),
-                            accesstoken = NULL,
+                            accesstoken,
                             limit = 100,
                             after = NULL,
                             before = NULL,
                             verbose = FALSE) {
 
-  if(is.null(accesstoken)){
-    stop("No token was specified")
-  }else {
-    if(is.null(accesstoken$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - accesstoken$access_time > 3600) stop("Token is expired")
-
-    if(accesstoken$scope != "read") stop("This function requires 'read' as scope of the token")
-  }
+  check_token(accesstoken, scope = "read")
 
   if(!type %in% c("popular", "new", "default"))
     stop("type has to be one of these: popular, new, default")
@@ -1022,6 +928,112 @@ get_subreddits <- function (type = c("popular", "new", "default"),
 
     subreddits_before <<- subreddits$name[order(subreddits$created, decreasing = T)][1]
 
+    if(verbose == TRUE) print(paste(nrow(subreddits),"subreddits retrieved from reddit."))
+
     return(subreddits)
   } else {print("No subreddits available")}
+}
+
+
+
+
+#' Get a list of user accounts
+#'
+#' @param type The type of list that is requested. Possible values are:
+#' \itemize{
+#'   \item \code{popular} User accounts that are popular right now
+#'   \item \code{new} Newly created user accounts
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param limit The maximum number of users to return. Must be a number
+#' between 1 and 100.
+#' @param before The fullname of an item serving as anchor in the
+#' request. Items before this item in the listing are returned.
+#' @param after The fullname of an item serving as anchor in the request.
+#' Items after this item in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#' @return A dataframe of users.
+#' @export
+#'
+
+get_users <- function(type = c("popular", "new"),
+                      accesstoken,
+                      limit = 100,
+                      after = NULL,
+                      before = NULL,
+                      verbose = FALSE) {
+
+  check_token(accesstoken, scope = "read")
+
+  if(!type %in% c("popular", "new"))
+    stop("type has to be one of these: popular, new")
+
+  if(!is.null(after) & is.null(before)){
+
+    link <- paste0("https://oauth.reddit.com/users/", type, ".json?limit=",
+                   limit, "&after=", after)
+
+  } else if(is.null(after) & !is.null(before)){
+
+    link <- paste0("https://oauth.reddit.com/users/", type, ".json?limit=",
+                   limit, "&before=", before)
+
+  }else if(!is.null(before) & !is.null(after)){
+
+    stop ('Only one of "before" or "after" should be specified')
+
+  } else if(is.null(before) & is.null(after)){
+
+    link <- paste0("https://oauth.reddit.com/users/", type, ".json?limit=",
+                   limit)
+  }
+
+  if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
+
+  auth <- paste("bearer", accesstoken$access_token)
+
+  request <- httr::GET(link,
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
+
+  httr::stop_for_status(request)
+
+  if(verbose == TRUE) print(httr::http_status(request)$message)
+
+  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
+
+  users <- response$data$children
+
+  if(nrow(users)>0){
+
+    names(users) <- sub("data.", "", names(users))
+
+    if(!is.null(response$data$after)){
+      users_after <<- response$data$after
+    } else {
+      users_after <<- NULL
+    }
+
+    users_before <<- users$name[order(users$created, decreasing = T)][1]
+
+    if(verbose == TRUE) print(paste(nrow(users),"users retrieved from reddit."))
+
+    return(users)
+  } else {print("No users available")}
+}
+
+
+check_token <- function(x, scope){
+
+  if(is.null(x)){
+    stop("No token was specified")
+  }else {
+    if(is.null(x$useragent)) stop("No user agent was specified")
+
+    if(Sys.time() - x$access_time > 3600) stop("Token is expired")
+
+    if(x$scope != scope) stop(paste("This function requires", scope, "as scope of the token"))
+  }
 }
