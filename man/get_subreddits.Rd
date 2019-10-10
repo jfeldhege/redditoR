@@ -4,8 +4,9 @@
 \alias{get_subreddits}
 \title{Get a list of subreddits}
 \usage{
-get_subreddits(type = c("popular", "new", "default"), accesstoken,
-  limit = 100, after = NULL, before = NULL, verbose = FALSE)
+get_subreddits(type = c("popular", "new", "default", "search"),
+  accesstoken, query = NULL, sort = NULL, limit = 100,
+  after = NULL, before = NULL, verbose = FALSE)
 }
 \arguments{
 \item{type}{The type of list that is requested. Possible values are:
@@ -14,10 +15,17 @@ get_subreddits(type = c("popular", "new", "default"), accesstoken,
   \item \code{new} Newly created subreddits
   \item \code{default} Default subreddits that users are subscribed to when
   they sign up for reddit.
+   \item \code{search} Search for subreddits with a query.
   }}
 
 \item{accesstoken}{The accesstoken required to access the endpoint. Scope
 must be \code{"read"}.}
+
+\item{query}{Search terms for type \code{search}. Must be less than 512
+characters.}
+
+\item{sort}{The order in which results from type \code{search} should be
+sorted. Possible values are \code{relevance} and \code{activity}.}
 
 \item{limit}{The maximum number of subreddits to return. Must be a number
 between 1 and 100.}
