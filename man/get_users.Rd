@@ -8,6 +8,12 @@ get_users(type = c("popular", "new"), accesstoken, limit = 100,
   after = NULL, before = NULL, verbose = FALSE)
 }
 \arguments{
+\item{type}{The type of list that is requested. Possible values are:
+\itemize{
+  \item \code{popular} User accounts that are popular right now
+  \item \code{new} Newly created user accounts
+  }}
+
 \item{accesstoken}{The accesstoken required to access the endpoint. Scope
 must be \code{"read"}.}
 
