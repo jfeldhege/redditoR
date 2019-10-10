@@ -844,7 +844,8 @@ get_trophies <- function (user,
 
 
 
-#' Get a list of subreddits
+#' Get a dataframe of subreddits sorted by creation date or popularity. Also
+#' allows searching for subreddits
 #'
 #' @param type The type of list that is requested. Possible values are:
 #' \itemize{
@@ -852,9 +853,14 @@ get_trophies <- function (user,
 #'   \item \code{new} Newly created subreddits
 #'   \item \code{default} Default subreddits that users are subscribed to when
 #'   they sign up for reddit.
+#'    \item \code{search} Search for subreddits with a query.
 #'   }
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"read"}.
+#' @param query Search terms for type \code{search}. Must be less than 512
+#' characters.
+#' @param sort The order in which results from type \code{search} should be
+#' sorted. Possible values are \code{"relevance"} and \code{"activity"}.
 #' @param limit The maximum number of subreddits to return. Must be a number
 #' between 1 and 100.
 #' @param before The fullname of an item serving as anchor in the
@@ -868,8 +874,10 @@ get_trophies <- function (user,
 #' @export
 #'
 
-get_subreddits <- function (type = c("popular", "new", "default"),
+get_subreddits <- function (type = c("popular", "new", "default", "search"),
                             accesstoken,
+                            query = NULL,
+                            sort = NULL,
                             limit = 100,
                             after = NULL,
                             before = NULL,
@@ -877,18 +885,24 @@ get_subreddits <- function (type = c("popular", "new", "default"),
 
   check_token(accesstoken, scope = "read")
 
-  if(!type %in% c("popular", "new", "default"))
-    stop("type has to be one of these: popular, new, default")
+  if(!type %in% c("popular", "new", "default", "search"))
+    stop("type has to be one of these: popular, new, default", "search")
+
+  if(type == "search") stopifnot(!is.null(query),
+                                 is.character(query),
+                                 nchar(query) > 0,
+                                 nchar(query) < 513)
+
 
   if(!is.null(after) & is.null(before)){
 
     link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
-                   limit, "&after=", after)
+                   limit, "&after=", after, "&q=", query, "&sort", sort)
 
   } else if(is.null(after) & !is.null(before)){
 
     link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
-                   limit, "&before=", before)
+                   limit, "&before=", before, "&q=", query, "&sort", sort)
 
   }else if(!is.null(before) & !is.null(after)){
 
@@ -897,7 +911,7 @@ get_subreddits <- function (type = c("popular", "new", "default"),
   } else if(is.null(before) & is.null(after)){
 
     link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
-                   limit)
+                   limit, "&q=", query, "&sort", sort)
   }
 
   if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
@@ -943,6 +957,7 @@ get_subreddits <- function (type = c("popular", "new", "default"),
 #' \itemize{
 #'   \item \code{popular} User accounts that are popular right now
 #'   \item \code{new} Newly created user accounts
+#'   }
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"read"}.
 #' @param limit The maximum number of users to return. Must be a number
@@ -966,6 +981,8 @@ get_users <- function(type = c("popular", "new"),
                       verbose = FALSE) {
 
   check_token(accesstoken, scope = "read")
+
+  stopifnot(limit < 101)
 
   if(!type %in% c("popular", "new"))
     stop("type has to be one of these: popular, new")
@@ -1022,6 +1039,107 @@ get_users <- function(type = c("popular", "new"),
 
     return(users)
   } else {print("No users available")}
+}
+
+
+
+#' Search for posts in a subreddit or all of reddit
+#'
+#' @param query The search query. Maximum length of the query is 512 characters.
+#' @param subreddit The name of the subreddit in which the search should be
+#' conducted. If left empty, the search will be conducted in all subreddits.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param sort The order in which the search results should be ordered
+#' when accessing them. Possible values are:
+#' \itemize{
+#'   \item \code{new}: Sorts search results by the time when they were created
+#'   \item \code{hot}: Sorts search results currently trending
+#'   \item \code{relevance}:
+#'   \item \code{comments}:
+#'   \item \code{top}: Most upvoted search results in a certain timeframe.
+#'   Timeframe can be specified with \code{time}.
+#' }
+#' @param limit The maximum number of search results to return. Must be a number
+#' between 1 and 100.
+#' @param time The timeframe in which the search results were created. Possible
+#' values are:
+#' \itemize{
+#'   \item \code{hour}
+#'   \item \code{day}
+#'   \item \code{week}
+#'   \item \code{month}
+#'   \item \code{year}
+#'   \item \code{all time}
+#' }
+#' @param before The fullname of a search result serving as anchor in the
+#' request. Search results before this post in the listing are returned.
+#' @param after The fullname of a search result serving as anchor in the
+#' request. Search results after this post in the listing are returned.
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#'
+#'
+#' @return A dataframe with posts matching the search query.
+#' @export
+#'
+#' @details Information on how to build advanced search queries can be found at
+#' this link: \url{https://www.reddit.com/wiki/search}
+
+search_reddit <- function(query,
+                          accesstoken,
+                          subreddit=NULL,
+                          sort ="new",
+                          limit=100,
+                          time = NULL,
+                          verbose = FALSE) {
+
+  check_token(accesstoken, scope = "read")
+
+  stopifnot(is.character(query), length(query)< 513)
+
+
+  if(!is.null(subreddit)){
+    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/search.json?q=",
+                   query, "&sort=", sort, "&limit=", limit, "&t=", time, "&restrict_sr=on")
+  } else{
+    link <- paste0("https://oauth.reddit.com/search.json?q=",
+                   query, "&sort=", sort, "&limit=", limit, "&t=", time, "&restrict_sr=off")
+  }
+
+
+  if(verbose == TRUE) print(paste("Getting search results from: ", link))
+
+  auth <- paste("bearer", accesstoken$access_token)
+
+  request <- httr::GET(link,
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
+
+  httr::stop_for_status(request)
+
+  if(verbose == TRUE) print(httr::http_status(request)$message)
+
+  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
+
+  search_results <- response$data$children
+
+  if(nrow(search_results)>0){
+
+    names(search_results) <- sub("data.", "", names(search_results))
+
+    if(!is.null(response$data$after)){
+      search_after <<- response$data$after
+    } else {
+      search_after <<- NULL
+    }
+
+    search_before <<- search_results$name[order(search_results$created, decreasing = T)][1]
+
+    if(verbose == TRUE) print(paste(nrow(search_results),"search results retrieved from reddit."))
+
+    return(search_results)
+  } else {print("No search results available")}
 }
 
 
