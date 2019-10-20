@@ -2,7 +2,8 @@
 % Please edit documentation in R/reddit_functions.R
 \name{get_subreddits}
 \alias{get_subreddits}
-\title{Get a list of subreddits}
+\title{Get a dataframe of subreddits sorted by creation date or popularity. Also
+allows searching for subreddits}
 \usage{
 get_subreddits(type = c("popular", "new", "default", "search"),
   accesstoken, query = NULL, sort = NULL, limit = 100,
@@ -25,7 +26,7 @@ must be \code{"read"}.}
 characters.}
 
 \item{sort}{The order in which results from type \code{search} should be
-sorted. Possible values are \code{relevance} and \code{activity}.}
+sorted. Possible values are \code{"relevance"} and \code{"activity"}.}
 
 \item{limit}{The maximum number of subreddits to return. Must be a number
 between 1 and 100.}
@@ -43,5 +44,6 @@ should be printed to the console.}
 A dataframe of subreddits.
 }
 \description{
-Get a list of subreddits
+Get a dataframe of subreddits sorted by creation date or popularity. Also
+allows searching for subreddits
 }
