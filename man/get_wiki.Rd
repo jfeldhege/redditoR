@@ -4,8 +4,7 @@
 \alias{get_wiki}
 \title{Get wiki pages for a specified subreddit.}
 \usage{
-get_wiki(subreddit = NULL, page = "all", accesstoken,
-  verbose = FALSE)
+get_wiki(subreddit, page = "all", accesstoken, verbose = FALSE)
 }
 \arguments{
 \item{subreddit}{Name of the subreddit for which wiki pages are requested.}
