@@ -15,8 +15,14 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                        username,
                        password) {
 
-  if(!scope %in% c("identity", "read", "history", "wikiread")) stop("Invalid scope")
+  assertthat::assert_that(assertthat::is.string(scope),
+                          scope %in% c("identity", "read", "history", "wikiread"),
+                          msg = "Invalid scope")
 
+  assertthat::assert_that(assertthat::is.string(useragent),
+                          assertthat::not_empty(useragent),
+                          nchar(useragent) > 0,
+                          msg = "Please supply a useragent")
 
   token <- httr::POST(url = "https://www.reddit.com/api/v1/access_token",
                       body = list(
@@ -95,13 +101,11 @@ get_posts <- function (subreddit,
 
   check_token(accesstoken, scope = "read")
 
-  if(!is.numeric(limit)) stop("limit has to be a number")
-
-  if(limit > 100 | limit < 1) stop("limit has to be a number between 1 and 100")
+  check_args(default_arg = "subreddit")
 
   if(!is.null(time)){
     if(!time %in% c("hour", "day", "week", "month", "year", "all"))
-    stop("Time has to be one of these: hour, day, week, month, year, all")}
+      stop("Time has to be one of these: hour, day, week, month, year, all")}
 
   #make link
   if(is.null(before) & !is.null(after)){
@@ -129,8 +133,8 @@ get_posts <- function (subreddit,
   auth <- paste("bearer", accesstoken$access_token)
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent))
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
   httr::stop_for_status(request)
 
@@ -233,11 +237,7 @@ get_submissions <- function (user,
 
   check_token(accesstoken, scope = "history")
 
-  if(is.null(user)) stop("No user was specified")
-
-  if(!is.numeric(limit)) stop("limit has to be a number")
-
-  if(limit > 100 | limit < 1) stop("limit has to be a number between 1 and 100")
+  check_args(default_arg = "user")
 
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
@@ -271,8 +271,8 @@ get_submissions <- function (user,
   auth <- paste("bearer", accesstoken$access_token)
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent)
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent)
   )
 
   httr::stop_for_status(request)
@@ -329,6 +329,8 @@ get_comments <- function (subreddit,
 
   check_token(accesstoken, scope = "read")
 
+  check_args(default_arg = "subreddit")
+
   if(is.null(before) & !is.null(after)){
 
     link <- paste0("https://oauth.reddit.com/r/", subreddit,
@@ -354,8 +356,8 @@ get_comments <- function (subreddit,
   auth <- paste("bearer", accesstoken$access_token)
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent))
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
   httr::stop_for_status(request)
 
@@ -435,11 +437,7 @@ get_user_comments <- function (user,
 
   check_token(accesstoken, scope = "history")
 
-  if(is.null(user)) stop("No user was specified")
-
-  if(!is.numeric(limit)) stop("limit has to be a number")
-
-  if(limit > 100 | limit < 1) stop("limit has to be a number between 1 and 100")
+  check_args(default_arg = "user")
 
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
@@ -564,11 +562,7 @@ get_user <- function (user,
 
   check_token(accesstoken, scope = "history")
 
-  if(!is.numeric(limit)) stop("limit has to be a number")
-
-  if(limit > 100 | limit < 1) stop("limit has to be a number between 1 and 100")
-
-  if(is.null(type)) stop("No type specified")
+  check_args(default_arg = "user")
 
   if(!type %in% c("overview", "comments", "submitted", "gilded"))
     stop("type has to be one of these: overview, comments, submitted, gilded")
@@ -604,8 +598,8 @@ get_user <- function (user,
   auth <- paste("bearer", accesstoken$access_token)
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent))
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
   httr::stop_for_status(request)
 
@@ -646,13 +640,13 @@ get_user <- function (user,
 #' @export
 
 
-get_user_info <- function (user = NULL,
-                           accesstoken=NULL,
+get_user_info <- function (user,
+                           accesstoken,
                            verbose = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
-  if(is.null(user)) stop("No user was specified")
+  check_args(default_arg = "user")
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -661,8 +655,8 @@ get_user_info <- function (user = NULL,
   if(verbose == TRUE) print(paste("Getting user info from: ", link))
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent))
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
   httr::stop_for_status(request)
 
@@ -705,14 +699,14 @@ get_user_info <- function (user = NULL,
 #'                                verbose = FALSE)
 #'                                }
 
-get_subreddit_info <- function (subreddit = NULL,
+get_subreddit_info <- function (subreddit,
                                 type = c("info", "moderators", "rules"),
-                                accesstoken = NULL,
+                                accesstoken,
                                 verbose = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
-  if(is.null(subreddit)) stop("No subreddit was specified")
+  check_args(default_arg = "subreddit")
 
   if(type == "info") {
 
@@ -730,8 +724,8 @@ get_subreddit_info <- function (subreddit = NULL,
   auth <- paste("bearer", accesstoken$access_token)
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent))
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
   httr::stop_for_status(request)
 
@@ -764,12 +758,14 @@ get_subreddit_info <- function (subreddit = NULL,
 #'
 #' @seealso \code{\link{get_subreddit_info}}
 
-get_wiki <- function (subreddit = NULL,
+get_wiki <- function (subreddit,
                       page = "all",
                       accesstoken,
                       verbose = FALSE) {
 
   check_token(accesstoken, scope = "wikiread")
+
+  check_args(default_arg = "subreddit")
 
   if(is.null(subreddit)) stop("No subreddit was specified")
 
@@ -784,8 +780,8 @@ get_wiki <- function (subreddit = NULL,
   if(verbose == TRUE) print(paste("Getting wiki from", link))
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent))
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
   httr::stop_for_status(request)
 
@@ -819,6 +815,8 @@ get_trophies <- function (user,
 
   check_token(accesstoken, scope = "read")
 
+  check_args(default_arg = "user")
+
   auth <- paste("bearer", accesstoken$access_token)
 
   link <- paste0("https://oauth.reddit.com/api/v1/user/", user,
@@ -827,8 +825,8 @@ get_trophies <- function (user,
   if(verbose == TRUE) print(paste("Getting trophies from:", link))
 
   request <- httr::GET(link,
-                 httr::add_headers(Authorization = auth),
-                 httr::user_agent(accesstoken$useragent))
+                       httr::add_headers(Authorization = auth),
+                       httr::user_agent(accesstoken$useragent))
 
   httr::stop_for_status(request)
 
@@ -885,14 +883,12 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 
   check_token(accesstoken, scope = "read")
 
+  check_args(default_arg = NULL)
+
   if(!type %in% c("popular", "new", "default", "search"))
     stop("type has to be one of these: popular, new, default", "search")
 
-  if(type == "search") stopifnot(!is.null(query),
-                                 is.character(query),
-                                 nchar(query) > 0,
-                                 nchar(query) < 513)
-
+  if(type == "search") stopifnot(!is.null(query))
 
   if(!is.null(after) & is.null(before)){
 
@@ -982,7 +978,7 @@ get_users <- function(type = c("popular", "new"),
 
   check_token(accesstoken, scope = "read")
 
-  stopifnot(limit < 101)
+  check_args()
 
   if(!type %in% c("popular", "new"))
     stop("type has to be one of these: popular, new")
@@ -1096,8 +1092,7 @@ search_reddit <- function(query,
 
   check_token(accesstoken, scope = "read")
 
-  stopifnot(is.character(query), length(query)< 513)
-
+  check_args(default_arg = "query")
 
   if(!is.null(subreddit)){
     link <- paste0("https://oauth.reddit.com/r/", subreddit, "/search.json?q=",
@@ -1154,4 +1149,67 @@ check_token <- function(x, scope){
 
     if(x$scope != scope) stop(paste("This function requires", scope, "as scope of the token"))
   }
+}
+
+
+check_args <- function(default_arg = NULL){
+
+  get_args <- function () {
+    as.list(sys.frame(-2))
+  }
+
+  check_strings <- function(x, y){
+
+    string_args <- c("user", "subreddit", "time", "page", "sort", "after",
+                     "before")
+
+    if(y %in% string_args & !is.null(x)) {
+      assertthat::assert_that(assertthat::is.string(x),
+                              assertthat::not_empty(x),
+                              msg = paste(y, "is not a character vector"))
+    }
+  }
+
+  args <- get_args()
+
+  if(!is.null(default_arg)){
+    if(default_arg == "user"){
+      assertthat::assert_that("user" %in% names(args),
+                              assertthat::not_empty(args$user),
+                              assertthat::is.string(args$user),
+                              nchar(args$user)> 0,
+                              msg = "A non-empty character vector has to be supplied for the parameter 'user'")
+    } else if(default_arg == "subreddit"){
+      assertthat::assert_that("subreddit" %in% names(args),
+                              assertthat::not_empty(args$subreddit),
+                              assertthat::is.string(args$subreddit),
+                              nchar(args$subreddit)> 0,
+                              msg = "A non-empty character vector has to be supplied for the parameter 'subreddit'")
+    } else if(default_arg == "query"){
+      assertthat::assert_that("query" %in% names(args),
+                              assertthat::not_empty(args$query),
+                              assertthat::is.string(args$query),
+                              nchar(args$query)> 0,
+                              msg = "A non-empty string has to be supplied for the parameter 'query'")
+    }
+  }
+
+  mapply(check_strings, args, names(args))
+
+  if("query" %in% names(args) & !is.null(args$query)){
+    assertthat::assert_that(assertthat::is.string(args$query),
+                            assertthat::not_empty(args$query),
+                            nchar(args$query) > 0,
+                            nchar(args$query) < 513)}
+
+  if("limit" %in% names(args) & !is.null(args$limit)){
+    assertthat::assert_that(assertthat::is.count(args$limit),
+                            args$limit < 101,
+                            args$limit > 0,
+                            msg = "'limit' has to be a number between 0 and 100")}
+
+  if("verbose" %in% names(args) & !is.null(args$verbose)){
+    assertthat::assert_that(assertthat::is.flag(args$verbose),
+                            msg = "'verbose' has to be a boolean")}
+
 }
