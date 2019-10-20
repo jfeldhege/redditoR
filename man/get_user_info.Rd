@@ -4,7 +4,7 @@
 \alias{get_user_info}
 \title{Get basic information about account for a specified user}
 \usage{
-get_user_info(user = NULL, accesstoken = NULL, verbose = FALSE)
+get_user_info(user, accesstoken, verbose = FALSE)
 }
 \arguments{
 \item{user}{Username of the Reddit user that is requested.}
