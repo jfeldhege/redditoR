@@ -5,7 +5,7 @@
 \title{Generate an access token for the Reddit API}
 \usage{
 get_token(scope = c("identity", "read", "history", "wikiread"),
-  useragent, username, password)
+  useragent, username = NULL, password = NULL)
 }
 \arguments{
 \item{scope}{The scope of what you want to access. Must be one of these:
@@ -13,9 +13,13 @@ identity, read, history, wikiread}
 
 \item{useragent}{The useragent for the device accessing the API}
 
-\item{username}{Username for the Reddit profile accessing the API}
+\item{username}{Username for the Reddit profile accessing the API. IF left
+empty, it will attempt to read from the environment. Can be set with
+\code{Sys.setenv(REDDIT_API_USERNAME = "")}}
 
-\item{password}{Password for the Reddit profile accessing the API}
+\item{password}{Password for the Reddit profile accessing the API. IF left
+empty, it will attempt to read from the environment. Can be set with
+\code{Sys.setenv(REDDIT_API_PASSWORD = "")}}
 }
 \value{
 A list containing the access token, the time until it expires, the
