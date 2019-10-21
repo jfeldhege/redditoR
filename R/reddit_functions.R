@@ -3,8 +3,12 @@
 #' @param scope The scope of what you want to access. Must be one of these:
 #' identity, read, history, wikiread
 #' @param useragent The useragent for the device accessing the API
-#' @param username Username for the Reddit profile accessing the API
-#' @param password Password for the Reddit profile accessing the API
+#' @param username Username for the Reddit profile accessing the API. IF left
+#' empty, it will attempt to read from the environment. Can be set with
+#' \code{Sys.setenv(REDDIT_API_USERNAME = "")}
+#' @param password Password for the Reddit profile accessing the API. IF left
+#' empty, it will attempt to read from the environment. Can be set with
+#' \code{Sys.setenv(REDDIT_API_PASSWORD = "")}
 #' @return A list containing the access token, the time until it expires, the
 #' scope, the time it was generated and the useragent
 #' @details Access tokens are only valid for an hour.
@@ -12,10 +16,12 @@
 
 get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                        useragent,
-                       username,
-                       password) {
+                       username = NULL,
+                       password = NULL) {
 
   assertthat::assert_that(assertthat::is.string(scope),
+                          assertthat::not_empty(useragent),
+                          nchar(useragent) > 0,
                           scope %in% c("identity", "read", "history", "wikiread"),
                           msg = "Invalid scope")
 
@@ -23,6 +29,22 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                           assertthat::not_empty(useragent),
                           nchar(useragent) > 0,
                           msg = "Please supply a useragent")
+
+  if(is.null(username)) {
+    username <- Sys.getenv("REDDIT_API_USERNAME")
+
+  }
+  if(is.null(password)){
+    password <- Sys.getenv("REDDIT_API_PASSWORD")
+  }
+  assertthat::assert_that(assertthat::is.string(username),
+                          assertthat::not_empty(username),
+                          nchar(username) > 0,
+                          assertthat::is.string(password),
+                          assertthat::not_empty(password),
+                          nchar(password) > 0,
+                          msg = "No username or password entered")
+
 
   token <- httr::POST(url = "https://www.reddit.com/api/v1/access_token",
                       body = list(
