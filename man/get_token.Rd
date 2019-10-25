@@ -13,11 +13,11 @@ identity, read, history, wikiread}
 
 \item{useragent}{The useragent for the device accessing the API}
 
-\item{username}{Username for the Reddit profile accessing the API. IF left
+\item{username}{Username for the Reddit profile accessing the API. If left
 empty, it will attempt to read from the environment. Can be set with
 \code{Sys.setenv(REDDIT_API_USERNAME = "")}}
 
-\item{password}{Password for the Reddit profile accessing the API. IF left
+\item{password}{Password for the Reddit profile accessing the API. If left
 empty, it will attempt to read from the environment. Can be set with
 \code{Sys.setenv(REDDIT_API_PASSWORD = "")}}
 }
