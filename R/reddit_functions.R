@@ -3,10 +3,10 @@
 #' @param scope The scope of what you want to access. Must be one of these:
 #' identity, read, history, wikiread
 #' @param useragent The useragent for the device accessing the API
-#' @param username Username for the Reddit profile accessing the API. IF left
+#' @param username Username for the Reddit profile accessing the API. If left
 #' empty, it will attempt to read from the environment. Can be set with
 #' \code{Sys.setenv(REDDIT_API_USERNAME = "")}
-#' @param password Password for the Reddit profile accessing the API. IF left
+#' @param password Password for the Reddit profile accessing the API. If left
 #' empty, it will attempt to read from the environment. Can be set with
 #' \code{Sys.setenv(REDDIT_API_PASSWORD = "")}
 #' @return A list containing the access token, the time until it expires, the
@@ -129,28 +129,11 @@ get_posts <- function (subreddit,
     if(!time %in% c("hour", "day", "week", "month", "year", "all"))
       stop("Time has to be one of these: hour, day, week, month, year, all")}
 
-  #make link
-  if(is.null(before) & !is.null(after)){
+  link <- build_link(path_elements = paste0("r/", subreddit, "/", sort),
+                     query_elements = paste0("limit=", limit, "&t=", time),
+                     before = before, after = after)
 
-    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/", sort,
-                   ".json?limit=", limit, "&after=", after, "&t=", time)
-
-  } else if (!is.null(before) & is.null(after)) {
-
-    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/", sort,
-                   ".json?limit=", limit, "&before=", before, "&t=", time)
-
-  } else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/", sort,
-                   ".json?limit=", limit, "&t=", time)
-  }
-
-  if(verbose == TRUE) print(paste("Getting data from",link, collapse=":"))
+  if(verbose == TRUE) print(paste("Getting posts from:",link))
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -165,7 +148,6 @@ get_posts <- function (subreddit,
   result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
   posts <- as.data.frame(result$data$children)
-
 
   if(nrow(posts)>0){
     names(posts) <- sub("data.", "", names(posts))
@@ -264,31 +246,12 @@ get_submissions <- function (user,
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
 
+  link <- build_link(path_elements = paste0("user/", user, "/submitted"),
+                     query_elements = paste0("limit=", limit,"&sort=", sort,
+                                             "&t=", time),
+                     before = before, after = after)
 
-  if(is.null(before) & !is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/submitted/", ".json?limit=",
-                   limit,"&sort=", sort, "&after=", after, "&t=", time)
-
-  } else if (!is.null(before) & is.null(after)) {
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/submitted/", ".json?limit=",
-                   limit,"&sort=", sort, "&before=", before, "&t=", time)
-
-  } else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/submitted/", ".json?limit=",
-                   limit,"&sort=", sort,  "&t=", time)
-  }
-
-  if(verbose == TRUE) print(paste("Getting data from", link, collapse=":"))
+  if(verbose == TRUE) print(paste("Getting submissions from:", link))
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -353,27 +316,11 @@ get_comments <- function (subreddit,
 
   check_args(default_arg = "subreddit")
 
-  if(is.null(before) & !is.null(after)){
+  link <- build_link(path_elements = paste0("r/", subreddit,"/comments"),
+             query_elements = paste0("limit=", limit),
+             before = before, after = after)
 
-    link <- paste0("https://oauth.reddit.com/r/", subreddit,
-                   "/comments/.json?limit=", limit, "&after=", after)
-
-  } else if (!is.null(before) & is.null(after)) {
-
-    link <- paste0("https://oauth.reddit.com/r/", subreddit,
-                   "/comments/.json?limit=", limit, "&before=", before)
-
-  } else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/r/",
-                   subreddit, "/comments/.json?limit=", limit)
-  }
-
-  if(verbose == TRUE) print(paste("Getting data from",link, collapse=":"))
+  if(verbose == TRUE) print(paste("Getting comments from:",link))
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -395,17 +342,17 @@ get_comments <- function (subreddit,
 
     if(verbose == TRUE) print(paste(nrow(comments),"comments retrieved from reddit."))
 
+    comments_after <<- result$data$after
+
+    comments_before <<- comments[order(comments$created, decreasing = T),"name"][1]
+
     return(as.data.frame(comments))
-
-    name_after <<- result$data$after
-
-    name_before <<- comments[order(comments$created, decreasing = T),"name"][1]
 
   } else{
     print("No comments retrieved from reddit.")
 
-    name_after <<- NA
-    name_before <<- NA
+    comments_after <<- NA
+    comments_before <<- NA
   }
 }
 
@@ -464,28 +411,12 @@ get_user_comments <- function (user,
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
 
-  if(is.null(before) & !is.null(after)){
+  link <- build_link(path_elements = paste0("user/", user,"/comments"),
+                     query_elements = paste0("limit=",limit,"&sort=", sort,
+                                             "&t=", time),
+                     before = before, after = after)
 
-    link <- paste0("https://oauth.reddit.com/user/", user,"/comments/.json?limit=",
-                   limit,"&sort=", sort, "&after=", after, "&t=", time)
-
-  } else if (!is.null(before) & is.null(after)) {
-
-
-    link <- paste0("https://oauth.reddit.com/user/", user, "/comments/.json?limit=",
-                   limit,"&sort=", sort, "&before=", before, "&t=", time)
-
-  } else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/user/", user,"/comments/.json?limit=",
-                   limit,"&sort=", sort, "&t=", time)
-  }
-
-  if(verbose == TRUE) print(paste("Get data from", link, collapse = ","))
+  if(verbose == TRUE) print(paste("Getting comments from:", link))
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -592,30 +523,12 @@ get_user <- function (user,
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
 
+  link <- build_link(path_elements = paste0("user/", user,"/", type),
+                     query_elements = paste0("limit=", limit, "&sort=", sort,
+                                             "&t=", time),
+                     before = before, after = after)
 
-  if(is.null(before) & !is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/", type,  "/.json?limit=", limit,
-                   "&sort=", sort, "&after=", after, "&t=", time)
-
-  } else if (!is.null(before) & is.null(after)) {
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/", type,  "/.json?limit=", limit,
-                   "&sort=", sort, "&before=", before, "&t=", time)
-
-  } else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/user/", user,
-                   "/", type,  "/.json?limit=", limit,"&sort=", sort,"&t=", time)
-  }
-
-  if(verbose == TRUE) print(paste("Getting data from", link, collapse=":"))
+  if(verbose == TRUE) print(paste("Getting user data from:", link))
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -670,11 +583,11 @@ get_user_info <- function (user,
 
   check_args(default_arg = "user")
 
-  auth <- paste("bearer", accesstoken$access_token)
-
-  link <- paste0("https://oauth.reddit.com/user/", user, "/about")
+  link <- build_link(path_elements = paste("user/", user, "/about"))
 
   if(verbose == TRUE) print(paste("Getting user info from: ", link))
+
+  auth <- paste("bearer", accesstoken$access_token)
 
   request <- httr::GET(link,
                        httr::add_headers(Authorization = auth),
@@ -732,12 +645,11 @@ get_subreddit_info <- function (subreddit,
 
   if(type == "info") {
 
-    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/about.json")
+    link <- build_link(path_elements = paste0("r/", subreddit, "/about"))
 
   } else if(type == "moderators"|type == "rules"){
 
-    link <- paste0("https://oauth.reddit.com/r/", subreddit,
-                   "/about/", type, ".json")
+    link <- build_link(path_elements = paste0("r/", subreddit, "/about/", type))
 
   } else stop("Result has to be 'info', 'moderators' or 'rules'.")
 
@@ -794,9 +706,11 @@ get_wiki <- function (subreddit,
   auth <- paste("bearer", accesstoken$access_token)
 
   if(page == "all"){
-    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/wiki/pages")
+    link <- build_link(path_elements = paste0("r/", subreddit, "/wiki/pages"),
+                       query_elements = NULL, before = NULL, after = NULL)
   } else{
-    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/wiki/", page)
+    link <- build_link(path_elements = paste0("r/", subreddit, "/wiki/", page),
+                       query_elements = NULL, before = NULL, after = NULL)
   }
 
   if(verbose == TRUE) print(paste("Getting wiki from", link))
@@ -839,12 +753,12 @@ get_trophies <- function (user,
 
   check_args(default_arg = "user")
 
-  auth <- paste("bearer", accesstoken$access_token)
-
-  link <- paste0("https://oauth.reddit.com/api/v1/user/", user,
-                 "/trophies", ".json")
+  link <- build_link(path_elements = paste0("api/v1/user/", user,
+                 "/trophies"), query_elements = NULL, before = NULL, after = NULL)
 
   if(verbose == TRUE) print(paste("Getting trophies from:", link))
+
+  auth <- paste("bearer", accesstoken$access_token)
 
   request <- httr::GET(link,
                        httr::add_headers(Authorization = auth),
@@ -910,27 +824,13 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
   if(!type %in% c("popular", "new", "default", "search"))
     stop("type has to be one of these: popular, new, default", "search")
 
-  if(type == "search") stopifnot(!is.null(query))
+  if(type == "search") assertthat::assert_that(!is.null(query),
+                                               msg = "No query specified for type search")
 
-  if(!is.null(after) & is.null(before)){
-
-    link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
-                   limit, "&after=", after, "&q=", query, "&sort", sort)
-
-  } else if(is.null(after) & !is.null(before)){
-
-    link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
-                   limit, "&before=", before, "&q=", query, "&sort", sort)
-
-  }else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/subreddits/", type, ".json?limit=",
-                   limit, "&q=", query, "&sort", sort)
-  }
+  link <- build_link(path_elements = paste0("subreddits/", type),
+                     query_elements = paste0("limit=",limit,  "&q=", query,
+                                             "&sort", sort),
+                     before = before, after = after)
 
   if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
 
@@ -1005,27 +905,11 @@ get_users <- function(type = c("popular", "new"),
   if(!type %in% c("popular", "new"))
     stop("type has to be one of these: popular, new")
 
-  if(!is.null(after) & is.null(before)){
+  link <- build_link(path_elements = paste0("users/", type),
+                     query_elements = paste0("limit=",limit),
+                     before = before, after = after)
 
-    link <- paste0("https://oauth.reddit.com/users/", type, ".json?limit=",
-                   limit, "&after=", after)
-
-  } else if(is.null(after) & !is.null(before)){
-
-    link <- paste0("https://oauth.reddit.com/users/", type, ".json?limit=",
-                   limit, "&before=", before)
-
-  }else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    link <- paste0("https://oauth.reddit.com/users/", type, ".json?limit=",
-                   limit)
-  }
-
-  if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
+  if(verbose == TRUE) print(paste("Getting users from: ", link))
 
   auth <- paste("bearer", accesstoken$access_token)
 
@@ -1116,14 +1000,14 @@ search_reddit <- function(query,
 
   check_args(default_arg = "query")
 
-  if(!is.null(subreddit)){
-    link <- paste0("https://oauth.reddit.com/r/", subreddit, "/search.json?q=",
-                   query, "&sort=", sort, "&limit=", limit, "&t=", time, "&restrict_sr=on")
-  } else{
-    link <- paste0("https://oauth.reddit.com/search.json?q=",
-                   query, "&sort=", sort, "&limit=", limit, "&t=", time, "&restrict_sr=off")
-  }
+  if(!is.null(subreddit)){search_path <- paste0("r/", subreddit, "/search")}
+  else{search_path <- paste0("search")}
 
+  link <- build_link(path_elements = search_path,
+                     query_elements = paste0("q=",query, "&sort=", sort,
+                                             "&limit=", limit, "&t=", time,
+                                             "&restrict_sr=on"),
+                     before = NULL, after = NULL)
 
   if(verbose == TRUE) print(paste("Getting search results from: ", link))
 
@@ -1233,5 +1117,35 @@ check_args <- function(default_arg = NULL){
   if("verbose" %in% names(args) & !is.null(args$verbose)){
     assertthat::assert_that(assertthat::is.flag(args$verbose),
                             msg = "'verbose' has to be a boolean")}
+}
 
+build_link <-  function(path_elements,
+                        query_elements = NULL,
+                        before = NULL,
+                        after = NULL){
+
+  url <- httr::parse_url("https://oauth.reddit.com/")
+
+  url$path <- paste0(path_elements, ".json")
+
+  if(is.null(before) & !is.null(after)){
+
+    url$query <- paste0(query_elements, "&after=", after)
+
+  } else if (!is.null(before) & is.null(after)) {
+
+    url$query <- paste0(query_elements, "&before=", before)
+
+  } else if(!is.null(before) & !is.null(after)){
+
+    stop ('Only one of "before" or "after" should be specified')
+
+  } else if(is.null(before) & is.null(after)){
+
+    url$query <- query_elements
+  }
+
+  link <- httr::build_url(url)
+
+  return(link)
 }
