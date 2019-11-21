@@ -104,6 +104,9 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #' Posts after this post in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #' @return A dataframe containg the requested posts
 #' @details More info at \url{https://www.reddit.com/dev/api/}
 
@@ -119,7 +122,8 @@ get_posts <- function (subreddit,
                        awards = FALSE,
                        after = NULL,
                        before = NULL,
-                       verbose = TRUE) {
+                       verbose = TRUE,
+                       retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -135,19 +139,11 @@ get_posts <- function (subreddit,
 
   if(verbose == TRUE) print(paste("Getting posts from:",link))
 
-  auth <- paste("bearer", accesstoken$access_token)
+  request <- make_request(accesstoken, link, verbose, retry)
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
+  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
-
-  posts <- as.data.frame(result$data$children)
+  posts <- as.data.frame(response$data$children)
 
   if(nrow(posts)>0){
     names(posts) <- sub("data.", "", names(posts))
@@ -175,8 +171,8 @@ get_posts <- function (subreddit,
       posts <- posts[, !grepl("all_awardings", names(posts))]
     }
 
-    if(!is.null(result$data$after)){
-      name_after <<- result$data$after
+    if(!is.null(response$data$after)){
+      name_after <<- response$data$after
     } else {
       name_after <<- NA
     }
@@ -224,6 +220,9 @@ get_posts <- function (subreddit,
 #' Posts after this post in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #'
 #' @return A dataframe of posts for a specified user.
 #' @export
@@ -237,7 +236,8 @@ get_submissions <- function (user,
                              limit = 100,
                              before = NULL,
                              after = NULL,
-                             verbose = FALSE) {
+                             verbose = FALSE,
+                             retry = TRUE) {
 
   check_token(accesstoken, scope = "history")
 
@@ -253,27 +253,18 @@ get_submissions <- function (user,
 
   if(verbose == TRUE) print(paste("Getting submissions from:", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
+  request <- make_request(accesstoken, link, verbose, retry)
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent)
-  )
+  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
-
-  submissions <- as.data.frame(result$data$children)
+  submissions <- as.data.frame(response$data$children)
 
   if (nrow(submissions)>0) {
 
     names(submissions) <- sub("data.", "", names(submissions))
 
-    if(!is.null(result$data$after)){
-      name_after <<- result$data$after
+    if(!is.null(response$data$after)){
+      name_after <<- response$data$after
     } else {
       name_after <<- NULL
     }
@@ -301,7 +292,9 @@ get_submissions <- function (user,
 #' Comments after this comment in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
-#'
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #' @return A dataframe with new comments from a specified subreddit.
 #' @export
 
@@ -310,7 +303,8 @@ get_comments <- function (subreddit,
                           limit=100,
                           before=NULL,
                           after=NULL,
-                          verbose = FALSE) {
+                          verbose = FALSE,
+                          retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -322,19 +316,11 @@ get_comments <- function (subreddit,
 
   if(verbose == TRUE) print(paste("Getting comments from:",link))
 
-  auth <- paste("bearer", accesstoken$access_token)
+  request <- make_request(accesstoken, link, verbose, retry)
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
+  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
 
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  result <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
-
-  comments <- result$data$children
+  comments <- response$data$children
 
   if(nrow(comments)>0){
 
@@ -342,7 +328,7 @@ get_comments <- function (subreddit,
 
     if(verbose == TRUE) print(paste(nrow(comments),"comments retrieved from reddit."))
 
-    comments_after <<- result$data$after
+    comments_after <<- response$data$after
 
     comments_before <<- comments[order(comments$created, decreasing = T),"name"][1]
 
@@ -390,7 +376,9 @@ get_comments <- function (subreddit,
 #' Comments after this comment in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
-#'
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #' @return A dataframe of comments for the specified user.
 #' @export
 
@@ -402,7 +390,8 @@ get_user_comments <- function (user,
                                limit = 100,
                                after=NULL,
                                before=NULL,
-                               verbose = FALSE) {
+                               verbose = FALSE,
+                               retry = TRUE) {
 
   check_token(accesstoken, scope = "history")
 
@@ -418,26 +407,18 @@ get_user_comments <- function (user,
 
   if(verbose == TRUE) print(paste("Getting comments from:", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
+  request <- make_request(accesstoken, link, verbose, retry)
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
+  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
-  httr::stop_for_status(request)
+  user_comments <- response$data$children
 
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
-
-  if (length(result$data$children) > 0) {
-
-    user_comments <- result$data$children
+  if (nrow(user_comments) > 0) {
 
     names(user_comments) <- sub("data.", "", names(user_comments))
 
-    if(!is.null(result$data$after)){
-      name_after <<- result$data$after
+    if(!is.null(reponse$data$after)){
+      name_after <<- response$data$after
     } else {
       name_after <<- NA
     }
@@ -498,7 +479,9 @@ get_user_comments <- function (user,
 #' Items after this item in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
-#'
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #' @return A dataframe of posts or comments for the specified user.
 #' @export
 
@@ -511,7 +494,8 @@ get_user <- function (user,
                       limit = 100,
                       before=NULL,
                       after=NULL,
-                      verbose = FALSE) {
+                      verbose = FALSE,
+                      retry = TRUE) {
 
   check_token(accesstoken, scope = "history")
 
@@ -530,35 +514,27 @@ get_user <- function (user,
 
   if(verbose == TRUE) print(paste("Getting user data from:", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
-
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
-
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
+  request <- make_request(accesstoken, link, verbose, retry)
 
   response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
-  result <- as.data.frame(response$data$children)
+  users <- as.data.frame(response$data$children)
 
-  if (nrow(result)>0) {
+  if (nrow(users)>0) {
 
-    names(result) <- sub("data.", "", names(result))
+    names(users) <- sub("data.", "", names(users))
 
-    if(!is.null(result$data$after)){
-      name_after <<- result$data$after
+    if(!is.null(users$data$after)){
+      name_after <<- users$data$after
     } else {
       name_after <<- NULL
     }
 
-    name_before <<- result[order(result$created, decreasing = T),"name"][1]
+    name_before <<- users[order(users$created, decreasing = T),"name"][1]
 
-    if(verbose == TRUE) print(paste(nrow(result),"items retrieved from reddit."))
+    if(verbose == TRUE) print(paste(nrow(users),"items retrieved from reddit."))
 
-    return(result)
+    return(users)
   } else {print("No result available for this user")}
 }
 
@@ -570,36 +546,33 @@ get_user <- function (user,
 #' must be \code{"read"}.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
-#'
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #' @return A dataframe with information about a specified user.
 #' @export
 
 
 get_user_info <- function (user,
                            accesstoken,
-                           verbose = FALSE) {
+                           verbose = FALSE,
+                           retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
   check_args(default_arg = "user")
 
-  link <- build_link(path_elements = paste("user/", user, "/about"))
+  link <- build_link(path_elements = paste0("user/", user, "/about"))
 
   if(verbose == TRUE) print(paste("Getting user info from: ", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
+  request <- make_request(accesstoken, link, verbose, retry)
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
+  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
-  httr::stop_for_status(request)
+  user_info <- as.data.frame(response$data[-15])
 
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  result <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
-
-  user_info <- as.data.frame(result$data[-15])
+  if(verbose == TRUE & nrow(user_info)>0) print("User Info retrieved from reddit.")
 
   return(user_info)
 }
@@ -617,6 +590,9 @@ get_user_info <- function (user,
 #' must be \code{"read"}.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #'
 #' @return A dataframe with basic information about a subreddit from the
 #' sidebar or a dataframe with the moderators or the rules of the subreddif.
@@ -637,7 +613,8 @@ get_user_info <- function (user,
 get_subreddit_info <- function (subreddit,
                                 type = c("info", "moderators", "rules"),
                                 accesstoken,
-                                verbose = FALSE) {
+                                verbose = FALSE,
+                                retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -653,23 +630,17 @@ get_subreddit_info <- function (subreddit,
 
   } else stop("Result has to be 'info', 'moderators' or 'rules'.")
 
-  if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
+  if(verbose == TRUE) print(paste("Getting subreddit info from:", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
-
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
-
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
+  request <- make_request(accesstoken, link, verbose, retry)
 
   result <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
 
   if(type == "info") sub_info <- result$data
   else if (type == "moderators") sub_info <- result$data$children
   else if (type == "rules") sub_info <- result$rules
+
+  if(verbose == TRUE) print(paste(nrow(sub_info),"items retrieved from reddit."))
 
   return(sub_info)
 }
@@ -684,6 +655,9 @@ get_subreddit_info <- function (subreddit,
 #' the access token must be \code{"wikiread"}.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #'
 #' @return A list containg the text of the page and all revisions.
 #' If  \code{"page"} is \code{"all"}, a character vector containg the names of
@@ -695,15 +669,12 @@ get_subreddit_info <- function (subreddit,
 get_wiki <- function (subreddit,
                       page = "all",
                       accesstoken,
-                      verbose = FALSE) {
+                      verbose = FALSE,
+                      retry = TRUE) {
 
   check_token(accesstoken, scope = "wikiread")
 
   check_args(default_arg = "subreddit")
-
-  if(is.null(subreddit)) stop("No subreddit was specified")
-
-  auth <- paste("bearer", accesstoken$access_token)
 
   if(page == "all"){
     link <- build_link(path_elements = paste0("r/", subreddit, "/wiki/pages"),
@@ -715,13 +686,7 @@ get_wiki <- function (subreddit,
 
   if(verbose == TRUE) print(paste("Getting wiki from", link))
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
-
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
+  request <- make_request(accesstoken, link, verbose, retry)
 
   result <- jsonlite::fromJSON(httr::content(request, as = "text"),
                                flatten = T)
@@ -740,6 +705,9 @@ get_wiki <- function (subreddit,
 #' the acces token must be \code{"read"}.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #'
 #' @return A dataframe with all trophies a specified user has received.
 #' @export
@@ -747,7 +715,8 @@ get_wiki <- function (subreddit,
 
 get_trophies <- function (user,
                           accesstoken,
-                          verbose = FALSE) {
+                          verbose = FALSE,
+                          retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -758,20 +727,14 @@ get_trophies <- function (user,
 
   if(verbose == TRUE) print(paste("Getting trophies from:", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
+  request <- make_request(accesstoken, link, verbose, retry)
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
-
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  result <- jsonlite::fromJSON(httr::content(request, as="text"),
+  response <- jsonlite::fromJSON(httr::content(request, as="text"),
                                flatten = FALSE)
 
-  trophies <- as.data.frame(result$data$trophies$data)
+  trophies <- as.data.frame(response$data$trophies$data)
+
+  if(verbose == TRUE) print(paste(nrow(trophies),"trophies retrieved from reddit."))
 
   return(trophies)
 }
@@ -803,7 +766,9 @@ get_trophies <- function (user,
 #' Items after this item in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
-#'
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #' @return A dataframe of subreddits.
 #' @export
 #'
@@ -815,7 +780,8 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
                             limit = 100,
                             after = NULL,
                             before = NULL,
-                            verbose = FALSE) {
+                            verbose = FALSE,
+                            retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -832,17 +798,9 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
                                              "&sort", sort),
                      before = before, after = after)
 
-  if(verbose == TRUE) print(paste("Getting subreddit info from: ", link))
+  if(verbose == TRUE) print(paste("Getting subreddit info from:", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
-
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
-
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
+  request <- make_request(accesstoken, link, verbose, retry)
 
   response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
 
@@ -886,7 +844,9 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 #' Items after this item in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
-#'
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #' @return A dataframe of users.
 #' @export
 #'
@@ -896,7 +856,8 @@ get_users <- function(type = c("popular", "new"),
                       limit = 100,
                       after = NULL,
                       before = NULL,
-                      verbose = FALSE) {
+                      verbose = FALSE,
+                      retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -911,15 +872,7 @@ get_users <- function(type = c("popular", "new"),
 
   if(verbose == TRUE) print(paste("Getting users from: ", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
-
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
-
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
+  request <- make_request(accesstoken, link, verbose, retry)
 
   response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
 
@@ -980,7 +933,9 @@ get_users <- function(type = c("popular", "new"),
 #' request. Search results after this post in the listing are returned.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
-#'
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
 #'
 #' @return A dataframe with posts matching the search query.
 #' @export
@@ -1148,4 +1103,29 @@ build_link <-  function(path_elements,
   link <- httr::build_url(url)
 
   return(link)
+}
+
+make_request <- function(accesstoken,
+                         link,
+                         verbose,
+                         retry){
+  auth <- paste("bearer", accesstoken$access_token)
+
+  if(retry){
+    request <- httr::RETRY("GET", url = link,
+                           httr::add_headers(Authorization = auth),
+                           httr::user_agent(accesstoken$useragent),
+                           times = 3)
+  } else {
+    request <- httr::GET(link,
+                         httr::add_headers(Authorization = auth),
+                         httr::user_agent(accesstoken$useragent))
+  }
+
+
+  httr::stop_for_status(request)
+
+  if(verbose == TRUE) print(httr::http_status(request)$message)
+
+  return(request)
 }
