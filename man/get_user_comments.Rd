@@ -5,7 +5,8 @@
 \title{Get comments from a specified user}
 \usage{
 get_user_comments(user, accesstoken, sort = "new", time = NULL,
-  limit = 100, after = NULL, before = NULL, verbose = FALSE)
+  limit = 100, after = NULL, before = NULL, verbose = FALSE,
+  retry = TRUE)
 }
 \arguments{
 \item{user}{The username of the user for which comments are requested.}
@@ -46,6 +47,10 @@ Comments before this comment in the listing are returned.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe of comments for the specified user.

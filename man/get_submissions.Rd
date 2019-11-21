@@ -5,7 +5,8 @@
 \title{Get submissions for a specified user}
 \usage{
 get_submissions(user, accesstoken, sort = "new", time = NULL,
-  limit = 100, before = NULL, after = NULL, verbose = FALSE)
+  limit = 100, before = NULL, after = NULL, verbose = FALSE,
+  retry = TRUE)
 }
 \arguments{
 \item{user}{The username of the user for which submissions are requested.}
@@ -45,6 +46,10 @@ Posts after this post in the listing are returned.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe of posts for a specified user.

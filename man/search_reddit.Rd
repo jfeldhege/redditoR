@@ -49,6 +49,10 @@ request. Search results before this post in the listing are returned.}
 
 \item{after}{The fullname of a search result serving as anchor in the
 request. Search results after this post in the listing are returned.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe with posts matching the search query.

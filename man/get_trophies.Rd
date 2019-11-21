@@ -4,7 +4,7 @@
 \alias{get_trophies}
 \title{Get trophies for a specified user}
 \usage{
-get_trophies(user, accesstoken, verbose = FALSE)
+get_trophies(user, accesstoken, verbose = FALSE, retry = TRUE)
 }
 \arguments{
 \item{user}{The username of the user}
@@ -14,6 +14,10 @@ the acces token must be \code{"read"}.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe with all trophies a specified user has received.

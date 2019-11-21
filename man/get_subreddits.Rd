@@ -7,7 +7,7 @@ allows searching for subreddits}
 \usage{
 get_subreddits(type = c("popular", "new", "default", "search"),
   accesstoken, query = NULL, sort = NULL, limit = 100,
-  after = NULL, before = NULL, verbose = FALSE)
+  after = NULL, before = NULL, verbose = FALSE, retry = TRUE)
 }
 \arguments{
 \item{type}{The type of list that is requested. Possible values are:
@@ -39,6 +39,10 @@ request. Items before this item in the listing are returned.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe of subreddits.

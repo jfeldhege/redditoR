@@ -4,7 +4,7 @@
 \alias{get_user_info}
 \title{Get basic information about account for a specified user}
 \usage{
-get_user_info(user, accesstoken, verbose = FALSE)
+get_user_info(user, accesstoken, verbose = FALSE, retry = TRUE)
 }
 \arguments{
 \item{user}{Username of the Reddit user that is requested.}
@@ -14,6 +14,10 @@ must be \code{"read"}.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe with information about a specified user.

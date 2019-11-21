@@ -4,7 +4,8 @@
 \alias{get_wiki}
 \title{Get wiki pages for a specified subreddit.}
 \usage{
-get_wiki(subreddit, page = "all", accesstoken, verbose = FALSE)
+get_wiki(subreddit, page = "all", accesstoken, verbose = FALSE,
+  retry = TRUE)
 }
 \arguments{
 \item{subreddit}{Name of the subreddit for which wiki pages are requested.}
@@ -17,6 +18,10 @@ the access token must be \code{"wikiread"}.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A list containg the text of the page and all revisions.

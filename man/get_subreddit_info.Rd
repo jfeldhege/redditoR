@@ -5,7 +5,7 @@
 \title{Get basic information for a specified subreddit.}
 \usage{
 get_subreddit_info(subreddit, type = c("info", "moderators", "rules"),
-  accesstoken, verbose = FALSE)
+  accesstoken, verbose = FALSE, retry = TRUE)
 }
 \arguments{
 \item{subreddit}{Name of the subreddit for which info is requested.}
@@ -20,6 +20,10 @@ must be \code{"read"}.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe with basic information about a subreddit from the

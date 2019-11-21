@@ -7,7 +7,7 @@
 get_posts(subreddit, accesstoken, sort = "new", limit = 100,
   time = NULL, link_flair = FALSE, author_flair = FALSE,
   user_reports = FALSE, secure_media = FALSE, awards = FALSE,
-  after = NULL, before = NULL, verbose = TRUE)
+  after = NULL, before = NULL, verbose = TRUE, retry = TRUE)
 }
 \arguments{
 \item{subreddit}{The name of the subreddit from which posts are requested.}
@@ -49,6 +49,10 @@ Posts before this post in the listing are returned.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe containg the requested posts

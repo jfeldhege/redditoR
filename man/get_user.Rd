@@ -6,7 +6,7 @@
 \usage{
 get_user(user, accesstoken, type = c("overview", "comments", "submitted",
   "gilded"), sort = "new", time = NULL, limit = 100, before = NULL,
-  after = NULL, verbose = FALSE)
+  after = NULL, verbose = FALSE, retry = TRUE)
 }
 \arguments{
 \item{user}{The username of the user for which posts and comments are
@@ -59,6 +59,10 @@ Items after this item in the listing are returned.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe of posts or comments for the specified user.
