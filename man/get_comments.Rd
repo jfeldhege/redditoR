@@ -5,7 +5,7 @@
 \title{Get comments from a specified subreddit}
 \usage{
 get_comments(subreddit, accesstoken, limit = 100, before = NULL,
-  after = NULL, verbose = FALSE)
+  after = NULL, verbose = FALSE, retry = TRUE)
 }
 \arguments{
 \item{subreddit}{The name of the subreddit from which comments are requested}
@@ -24,6 +24,10 @@ Comments after this comment in the listing are returned.}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
+
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
 }
 \value{
 A dataframe with new comments from a specified subreddit.
