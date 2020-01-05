@@ -958,36 +958,37 @@ parse_response <- function(response,
 
   if("data" %in% names(response_json)){
     data <- response_json$data
-
-    if("children" %in% names(data)) {
-      data <- data$children
-    }
   }
 
   if(length(data)>0){
 
     if(!is.data.frame(data)){
 
-      replace_null <- function(x) {
-        lapply(x, function(x) {
-          if (is.list(x)){
-            replace_null(x)
-          } else{
-            if(is.null(x)) NA else(x)
-          }
-        })
+      is_df <- sapply(data, is.data.frame)
+
+      if(any(is_df)){
+        data <- data[[which(is_df)]]
+      } else {
+        replace_null <- function(x) {
+          lapply(x, function(x) {
+            if (is.list(x)){
+              replace_null(x)
+            } else{
+              if(is.null(x)) NA else(x)
+            }
+          })
+        }
+
+        data <- replace_null(data)
+
+        replace_empty_list <- function(x){
+          if (is.list(x) & length(x) == 0) NA else (x)
+        }
+
+        data <- replace_empty_list(data)
+
+        data <- data.frame(t(unlist(data)), stringsAsFactors = FALSE)
       }
-
-      data <- replace_null(data)
-
-      replace_empty_list <- function(x){
-        if (is.list(x) & length(x) == 0) NA else (x)
-      }
-
-
-      data <- replace_empty_list(data)
-
-      data <- data.frame(t(unlist(data)), stringsAsFactors = FALSE)
     }
 
     names(data) <- sub("data.", "", names(data))
