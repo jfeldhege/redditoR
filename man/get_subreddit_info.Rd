@@ -4,8 +4,13 @@
 \alias{get_subreddit_info}
 \title{Get basic information for a specified subreddit.}
 \usage{
-get_subreddit_info(subreddit, type = c("info", "moderators", "rules"),
-  accesstoken, verbose = FALSE, retry = TRUE)
+get_subreddit_info(
+  subreddit,
+  type = c("info", "moderators", "rules"),
+  accesstoken,
+  verbose = FALSE,
+  retry = TRUE
+)
 }
 \arguments{
 \item{subreddit}{Name of the subreddit for which info is requested.}

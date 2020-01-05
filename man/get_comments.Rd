@@ -4,8 +4,15 @@
 \alias{get_comments}
 \title{Get comments from a specified subreddit}
 \usage{
-get_comments(subreddit, accesstoken, limit = 100, before = NULL,
-  after = NULL, verbose = FALSE, retry = TRUE)
+get_comments(
+  subreddit,
+  accesstoken,
+  limit = 100,
+  before = NULL,
+  after = NULL,
+  verbose = FALSE,
+  retry = TRUE
+)
 }
 \arguments{
 \item{subreddit}{The name of the subreddit from which comments are requested}

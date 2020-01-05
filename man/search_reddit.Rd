@@ -4,8 +4,16 @@
 \alias{search_reddit}
 \title{Search for posts in a subreddit or all of reddit}
 \usage{
-search_reddit(query, accesstoken, subreddit = NULL, sort = "new",
-  limit = 100, time = NULL, verbose = FALSE)
+search_reddit(
+  query,
+  accesstoken,
+  subreddit = NULL,
+  sort = "new",
+  limit = 100,
+  time = NULL,
+  verbose = FALSE,
+  retry = FALSE
+)
 }
 \arguments{
 \item{query}{The search query. Maximum length of the query is 512 characters.}
@@ -44,15 +52,15 @@ values are:
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
 
+\item{retry}{A logical flag whether a failed api request should be retried.
+Requests will be tried up to three times with varying time intervals between
+requests.}
+
 \item{before}{The fullname of a search result serving as anchor in the
 request. Search results before this post in the listing are returned.}
 
 \item{after}{The fullname of a search result serving as anchor in the
 request. Search results after this post in the listing are returned.}
-
-\item{retry}{A logical flag whether a failed api request should be retried.
-Requests will be tried up to three times with varying time intervals between
-requests.}
 }
 \value{
 A dataframe with posts matching the search query.

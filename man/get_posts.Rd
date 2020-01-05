@@ -4,10 +4,17 @@
 \alias{get_posts}
 \title{Get posts from a specified subreddit}
 \usage{
-get_posts(subreddit, accesstoken, sort = "new", limit = 100,
-  time = NULL, link_flair = FALSE, author_flair = FALSE,
-  user_reports = FALSE, secure_media = FALSE, awards = FALSE,
-  after = NULL, before = NULL, verbose = TRUE, retry = TRUE)
+get_posts(
+  subreddit,
+  accesstoken,
+  sort = "new",
+  limit = 100,
+  time = NULL,
+  after = NULL,
+  before = NULL,
+  verbose = TRUE,
+  retry = TRUE
+)
 }
 \arguments{
 \item{subreddit}{The name of the subreddit from which posts are requested.}

@@ -4,8 +4,15 @@
 \alias{get_users}
 \title{Get a list of user accounts}
 \usage{
-get_users(type = c("popular", "new"), accesstoken, limit = 100,
-  after = NULL, before = NULL, verbose = FALSE, retry = TRUE)
+get_users(
+  type = c("popular", "new"),
+  accesstoken,
+  limit = 100,
+  after = NULL,
+  before = NULL,
+  verbose = FALSE,
+  retry = TRUE
+)
 }
 \arguments{
 \item{type}{The type of list that is requested. Possible values are:

@@ -4,9 +4,18 @@
 \alias{get_user}
 \title{Get posts and comments from a specified user}
 \usage{
-get_user(user, accesstoken, type = c("overview", "comments", "submitted",
-  "gilded"), sort = "new", time = NULL, limit = 100, before = NULL,
-  after = NULL, verbose = FALSE, retry = TRUE)
+get_user(
+  user,
+  accesstoken,
+  type = c("overview", "comments", "submitted", "gilded"),
+  sort = "new",
+  time = NULL,
+  limit = 100,
+  before = NULL,
+  after = NULL,
+  verbose = FALSE,
+  retry = TRUE
+)
 }
 \arguments{
 \item{user}{The username of the user for which posts and comments are

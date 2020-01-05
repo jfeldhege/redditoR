@@ -4,8 +4,12 @@
 \alias{get_token}
 \title{Generate an access token for the Reddit API}
 \usage{
-get_token(scope = c("identity", "read", "history", "wikiread"),
-  useragent, username = NULL, password = NULL)
+get_token(
+  scope = c("identity", "read", "history", "wikiread"),
+  useragent,
+  username = NULL,
+  password = NULL
+)
 }
 \arguments{
 \item{scope}{The scope of what you want to access. Must be one of these:

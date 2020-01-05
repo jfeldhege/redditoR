@@ -5,9 +5,17 @@
 \title{Get a dataframe of subreddits sorted by creation date or popularity. Also
 allows searching for subreddits}
 \usage{
-get_subreddits(type = c("popular", "new", "default", "search"),
-  accesstoken, query = NULL, sort = NULL, limit = 100,
-  after = NULL, before = NULL, verbose = FALSE, retry = TRUE)
+get_subreddits(
+  type = c("popular", "new", "default", "search"),
+  accesstoken,
+  query = NULL,
+  sort = NULL,
+  limit = 100,
+  after = NULL,
+  before = NULL,
+  verbose = FALSE,
+  retry = TRUE
+)
 }
 \arguments{
 \item{type}{The type of list that is requested. Possible values are:

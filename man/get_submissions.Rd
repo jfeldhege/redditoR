@@ -4,9 +4,17 @@
 \alias{get_submissions}
 \title{Get submissions for a specified user}
 \usage{
-get_submissions(user, accesstoken, sort = "new", time = NULL,
-  limit = 100, before = NULL, after = NULL, verbose = FALSE,
-  retry = TRUE)
+get_submissions(
+  user,
+  accesstoken,
+  sort = "new",
+  time = NULL,
+  limit = 100,
+  before = NULL,
+  after = NULL,
+  verbose = FALSE,
+  retry = TRUE
+)
 }
 \arguments{
 \item{user}{The username of the user for which submissions are requested.}
