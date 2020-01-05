@@ -115,11 +115,6 @@ get_posts <- function (subreddit,
                        sort ="new",
                        limit=100,
                        time = NULL,
-                       link_flair = FALSE,
-                       author_flair = FALSE,
-                       user_reports = FALSE,
-                       secure_media = FALSE,
-                       awards = FALSE,
                        after = NULL,
                        before = NULL,
                        verbose = TRUE,
@@ -139,52 +134,11 @@ get_posts <- function (subreddit,
 
   if(verbose == TRUE) print(paste("Getting posts from:",link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
+  posts <- parse_response(resp,after_before = TRUE, verbose)
 
-  posts <- as.data.frame(response$data$children)
-
-  if(nrow(posts)>0){
-    names(posts) <- sub("data.", "", names(posts))
-
-    if(link_flair == FALSE) {
-      posts <- posts[, !grepl("link_flair", names(posts))]
-    } else{
-      #posts$link_flair_richtext <- do.call("rbind", posts$link_flair_richtext)
-    }
-
-    if(author_flair == FALSE) {
-      posts <- posts[, !grepl("author_flair", names(posts))]
-    }
-
-    if(user_reports == FALSE){
-      posts <- posts[, !grepl("user_reports", names(posts))]
-    }
-
-    if(secure_media == FALSE){
-      posts <- posts[, !grepl("secure_media", names(posts))]
-    }
-
-
-    if(awards == FALSE){
-      posts <- posts[, !grepl("all_awardings", names(posts))]
-    }
-
-    if(!is.null(response$data$after)){
-      name_after <<- response$data$after
-    } else {
-      name_after <<- NA
-    }
-
-    name_before <<- posts[order(posts$created, decreasing = T),"name"][1]
-
-    if(verbose == TRUE) print(paste(nrow(posts),"posts retrieved from reddit."))
-    return(posts)
-
-  } else {
-    if(verbose == TRUE) print("No posts retrieved from reddit.")
-  }
+  return(posts)
 }
 
 
@@ -255,26 +209,11 @@ get_submissions <- function (user,
 
   request <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
+  resp <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
 
-  submissions <- as.data.frame(response$data$children)
+  submissions <- parse_response(resp,after_before = TRUE, verbose)
 
-  if (nrow(submissions)>0) {
-
-    names(submissions) <- sub("data.", "", names(submissions))
-
-    if(!is.null(response$data$after)){
-      name_after <<- response$data$after
-    } else {
-      name_after <<- NULL
-    }
-
-    name_before <<- submissions[order(submissions$created, decreasing = T),"name"][1]
-
-    if(verbose == TRUE) print(paste(nrow(submissions),"submissions retrieved from reddit."))
-
-    return(submissions)
-  } else {print("No submissions available for this user")}
+  return(submissions)
 }
 
 
@@ -311,35 +250,16 @@ get_comments <- function (subreddit,
   check_args(default_arg = "subreddit")
 
   link <- build_link(path_elements = paste0("r/", subreddit,"/comments"),
-             query_elements = paste0("limit=", limit),
-             before = before, after = after)
+                     query_elements = paste0("limit=", limit),
+                     before = before, after = after)
 
   if(verbose == TRUE) print(paste("Getting comments from:",link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
+  comments <- parse_response(resp,after_before = TRUE, verbose)
 
-  comments <- response$data$children
-
-  if(nrow(comments)>0){
-
-    names(comments) <- sub("data.", "", names(comments))
-
-    if(verbose == TRUE) print(paste(nrow(comments),"comments retrieved from reddit."))
-
-    comments_after <<- response$data$after
-
-    comments_before <<- comments[order(comments$created, decreasing = T),"name"][1]
-
-    return(as.data.frame(comments))
-
-  } else{
-    print("No comments retrieved from reddit.")
-
-    comments_after <<- NA
-    comments_before <<- NA
-  }
+  return(comments)
 }
 
 
@@ -407,31 +327,11 @@ get_user_comments <- function (user,
 
   if(verbose == TRUE) print(paste("Getting comments from:", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
+  user_comments <- parse_response(resp,after_before = TRUE, verbose)
 
-  user_comments <- response$data$children
-
-  if (nrow(user_comments) > 0) {
-
-    names(user_comments) <- sub("data.", "", names(user_comments))
-
-    if(!is.null(reponse$data$after)){
-      name_after <<- response$data$after
-    } else {
-      name_after <<- NA
-    }
-
-    name_before <<-user_comments[order(user_comments$created, decreasing = T),"name"][1]
-
-    return(user_comments)
-  } else{
-    print("No comments for the user retrieved from reddit.")
-
-    name_after <<- NA
-    name_before <<- NA
-  }
+  return(user_comments)
 }
 
 
@@ -514,28 +414,11 @@ get_user <- function (user,
 
   if(verbose == TRUE) print(paste("Getting user data from:", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
+  user <- parse_response(resp,after_before = TRUE, verbose)
 
-  users <- as.data.frame(response$data$children)
-
-  if (nrow(users)>0) {
-
-    names(users) <- sub("data.", "", names(users))
-
-    if(!is.null(users$data$after)){
-      name_after <<- users$data$after
-    } else {
-      name_after <<- NULL
-    }
-
-    name_before <<- users[order(users$created, decreasing = T),"name"][1]
-
-    if(verbose == TRUE) print(paste(nrow(users),"items retrieved from reddit."))
-
-    return(users)
-  } else {print("No result available for this user")}
+  return(user)
 }
 
 
@@ -566,13 +449,11 @@ get_user_info <- function (user,
 
   if(verbose == TRUE) print(paste("Getting user info from: ", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
-
-  user_info <- as.data.frame(response$data[-15])
-
-  if(verbose == TRUE & nrow(user_info)>0) print("User Info retrieved from reddit.")
+  user_info <- parse_response(resp,
+                              after_before = FALSE,
+                              verbose = verbose)
 
   return(user_info)
 }
@@ -632,16 +513,11 @@ get_subreddit_info <- function (subreddit,
 
   if(verbose == TRUE) print(paste("Getting subreddit info from:", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  result <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
-
-  if(type == "info") sub_info <- result$data
-  else if (type == "moderators") sub_info <- result$data$children
-  else if (type == "rules") sub_info <- result$rules
-
-  if(verbose == TRUE) print(paste(nrow(sub_info),"items retrieved from reddit."))
-
+  sub_info <- parse_response(resp,
+                             after_before = FALSE,
+                             verbose = verbose)
   return(sub_info)
 }
 
@@ -686,12 +562,11 @@ get_wiki <- function (subreddit,
 
   if(verbose == TRUE) print(paste("Getting wiki from", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  result <- jsonlite::fromJSON(httr::content(request, as = "text"),
-                               flatten = T)
-
-  wiki <- result$data
+  wiki <- parse_response(resp,
+                         after_before = FALSE,
+                         verbose = verbose)
 
   return(wiki)
 }
@@ -723,18 +598,15 @@ get_trophies <- function (user,
   check_args(default_arg = "user")
 
   link <- build_link(path_elements = paste0("api/v1/user/", user,
-                 "/trophies"), query_elements = NULL, before = NULL, after = NULL)
+                                            "/trophies"), query_elements = NULL, before = NULL, after = NULL)
 
   if(verbose == TRUE) print(paste("Getting trophies from:", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as="text"),
-                               flatten = FALSE)
-
-  trophies <- as.data.frame(response$data$trophies$data)
-
-  if(verbose == TRUE) print(paste(nrow(trophies),"trophies retrieved from reddit."))
+  trophies <- parse_response(resp,
+                             after_before = FALSE,
+                             verbose = verbose)
 
   return(trophies)
 }
@@ -800,28 +672,13 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 
   if(verbose == TRUE) print(paste("Getting subreddit info from:", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
+  subreddits <- parse_response(resp,
+                               after_before = TRUE,
+                               verbose = verbose)
 
-  subreddits <- response$data$children
-
-  if(nrow(subreddits)>0){
-
-    names(subreddits) <- sub("data.", "", names(subreddits))
-
-    if(!is.null(response$data$after)){
-      subreddits_after <<- response$data$after
-    } else {
-      subreddits_after <<- NULL
-    }
-
-    subreddits_before <<- subreddits$name[order(subreddits$created, decreasing = T)][1]
-
-    if(verbose == TRUE) print(paste(nrow(subreddits),"subreddits retrieved from reddit."))
-
-    return(subreddits)
-  } else {print("No subreddits available")}
+  return(subreddits)
 }
 
 
@@ -872,28 +729,13 @@ get_users <- function(type = c("popular", "new"),
 
   if(verbose == TRUE) print(paste("Getting users from: ", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
+  users <- parse_response(resp,
+                          after_before = TRUE,
+                          verbose = verbose)
 
-  users <- response$data$children
-
-  if(nrow(users)>0){
-
-    names(users) <- sub("data.", "", names(users))
-
-    if(!is.null(response$data$after)){
-      users_after <<- response$data$after
-    } else {
-      users_after <<- NULL
-    }
-
-    users_before <<- users$name[order(users$created, decreasing = T)][1]
-
-    if(verbose == TRUE) print(paste(nrow(users),"users retrieved from reddit."))
-
-    return(users)
-  } else {print("No users available")}
+  return(users)
 }
 
 
@@ -949,7 +791,8 @@ search_reddit <- function(query,
                           sort ="new",
                           limit=100,
                           time = NULL,
-                          verbose = FALSE) {
+                          verbose = FALSE,
+                          retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -966,36 +809,13 @@ search_reddit <- function(query,
 
   if(verbose == TRUE) print(paste("Getting search results from: ", link))
 
-  auth <- paste("bearer", accesstoken$access_token)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  request <- httr::GET(link,
-                       httr::add_headers(Authorization = auth),
-                       httr::user_agent(accesstoken$useragent))
+  search_results <- parse_response(resp,
+                                   after_before = TRUE,
+                                   verbose = verbose)
 
-  httr::stop_for_status(request)
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  response <- jsonlite::fromJSON(httr::content(request, as = "text"), flatten = TRUE)
-
-  search_results <- response$data$children
-
-  if(nrow(search_results)>0){
-
-    names(search_results) <- sub("data.", "", names(search_results))
-
-    if(!is.null(response$data$after)){
-      search_after <<- response$data$after
-    } else {
-      search_after <<- NULL
-    }
-
-    search_before <<- search_results$name[order(search_results$created, decreasing = T)][1]
-
-    if(verbose == TRUE) print(paste(nrow(search_results),"search results retrieved from reddit."))
-
-    return(search_results)
-  } else {print("No search results available")}
+  return(search_results)
 }
 
 
@@ -1128,4 +948,64 @@ make_request <- function(accesstoken,
   if(verbose == TRUE) print(httr::http_status(request)$message)
 
   return(request)
+}
+
+parse_response <- function(response,
+                           after_before = FALSE,
+                           verbose) {
+
+  response_json <- jsonlite::fromJSON(httr::content(response, as="text"), flatten = TRUE)
+
+  if("data" %in% names(response_json)){
+    data <- response_json$data
+
+    if("children" %in% names(data)) {
+      data <- data$children
+    }
+  }
+
+  if(length(data)>0){
+
+    if(!is.data.frame(data)){
+
+      replace_null <- function(x) {
+        lapply(x, function(x) {
+          if (is.list(x)){
+            replace_null(x)
+          } else{
+            if(is.null(x)) NA else(x)
+          }
+        })
+      }
+
+      data <- replace_null(data)
+
+      replace_empty_list <- function(x){
+        if (is.list(x) & length(x) == 0) NA else (x)
+      }
+
+
+      data <- replace_empty_list(data)
+
+      data <- data.frame(t(unlist(data)), stringsAsFactors = FALSE)
+    }
+
+    names(data) <- sub("data.", "", names(data))
+
+    if(verbose == TRUE) print(paste(nrow(data),"item(s) retrieved from reddit."))
+
+    if(after_before == TRUE){
+      after <<- response_json$data$after
+
+      before <<- data[order(data$created, decreasing = T),"name"][1]
+    }
+
+    return(data)
+
+  } else{
+    if(verbose == TRUE) print("No items retrieved from reddit.")
+
+    df_after <<- NA
+    df_before <<- NA
+  }
 }
