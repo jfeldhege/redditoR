@@ -9,19 +9,30 @@
 #' @param password Password for the Reddit profile accessing the API. If left
 #' empty, it will attempt to read from the environment. Can be set with
 #' \code{Sys.setenv(REDDIT_API_PASSWORD = "")}
+#' @param client_id The id of the app through which the API is accessed.If left
+#' empty, it will attempt to read from the environment. Can be set with
+#' \code{Sys.setenv(REDDIT_API_CLIENT_ID = "")}
+#' @param client_secret The client secret of the app through which the API is
+#' accessed. If left empty, it will attempt to read from the environment. Can be
+#' set with\code{Sys.setenv(REDDIT_API_SECRET = "")}
 #' @return A list containing the access token, the time until it expires, the
 #' scope, the time it was generated and the useragent
 #' @details Access tokens are only valid for an hour.
-#' More info at \url{https://www.reddit.com/dev/api/}
+#' Apps can be defined in the settings at this page
+#' \url{https://www.reddit.com/prefs/apps/. Client ID and Client Secret must be
+#' taken from this page.
+#' More info about accessing the API at \url{https://www.reddit.com/dev/api/}
 
 get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                        useragent,
                        username = NULL,
-                       password = NULL) {
+                       password = NULL,
+                       client_id = NULL,
+                       client_secret = NULL) {
 
   assertthat::assert_that(assertthat::is.string(scope),
-                          assertthat::not_empty(useragent),
-                          nchar(useragent) > 0,
+                          assertthat::not_empty(scope),
+                          nchar(scope) > 0,
                           scope %in% c("identity", "read", "history", "wikiread"),
                           msg = "Invalid scope")
 
@@ -30,21 +41,15 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                           nchar(useragent) > 0,
                           msg = "Please supply a useragent")
 
-  if(is.null(username)) {
-    username <- Sys.getenv("REDDIT_API_USERNAME")
+  if(is.null(username)) {username <- Sys.getenv("REDDIT_API_USERNAME")}
+  if(is.null(password)){password <- Sys.getenv("REDDIT_API_PASSWORD")}
+  if(is.null(client_id)){client_id <- Sys.getenv("REDDIT_API_CLIENT_ID")}
+  if(is.null(client_secret)){client_secret <- Sys.getenv("REDDIT_API_CLIENT_SECRET")}
 
-  }
-  if(is.null(password)){
-    password <- Sys.getenv("REDDIT_API_PASSWORD")
-  }
-  assertthat::assert_that(assertthat::is.string(username),
-                          assertthat::not_empty(username),
-                          nchar(username) > 0,
-                          assertthat::is.string(password),
-                          assertthat::not_empty(password),
-                          nchar(password) > 0,
-                          msg = "No username or password entered")
-
+  check_credentials(username)
+  check_credentials(password)
+  check_credentials(client_id)
+  check_credentials(client_secret)
 
   token <- httr::POST(url = "https://www.reddit.com/api/v1/access_token",
                       body = list(
@@ -53,7 +58,7 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                         password = password,
                         scope = scope),
                       encode = "form",
-                      httr::authenticate("cTExHaVDTw05uQ", "hwoARWG2b5Q-rBD03kFEeRu6aRw"),
+                      httr::authenticate(client_id, client_secret),
                       httr::user_agent(useragent)
   )
 
@@ -110,15 +115,15 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #' @return A dataframe containg the requested posts
 #' @details More info at \url{https://www.reddit.com/dev/api/}
 
-get_posts <- function (subreddit,
-                       accesstoken,
-                       sort ="new",
-                       limit=100,
-                       time = NULL,
-                       after = NULL,
-                       before = NULL,
-                       verbose = TRUE,
-                       retry = TRUE) {
+get_posts <- function(subreddit,
+                      accesstoken,
+                      sort ="new",
+                      limit=100,
+                      time = NULL,
+                      after = NULL,
+                      before = NULL,
+                      verbose = TRUE,
+                      retry = TRUE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -1010,3 +1015,12 @@ parse_response <- function(response,
     df_before <<- NA
   }
 }
+
+check_credentials <- function(cred) {
+  assertthat::assert_that(assertthat::is.string(cred),
+                          assertthat::not_empty(cred),
+                          nchar(cred) > 0,
+                          msg = paste(deparse(substitute(cred)),
+                                      "needs to be passed as a character vector"))
+}
+

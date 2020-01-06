@@ -8,7 +8,9 @@ get_token(
   scope = c("identity", "read", "history", "wikiread"),
   useragent,
   username = NULL,
-  password = NULL
+  password = NULL,
+  client_id = NULL,
+  client_secret = NULL
 )
 }
 \arguments{
@@ -24,6 +26,14 @@ empty, it will attempt to read from the environment. Can be set with
 \item{password}{Password for the Reddit profile accessing the API. If left
 empty, it will attempt to read from the environment. Can be set with
 \code{Sys.setenv(REDDIT_API_PASSWORD = "")}}
+
+\item{client_id}{The id of the app through which the API is accessed.If left
+empty, it will attempt to read from the environment. Can be set with
+\code{Sys.setenv(REDDIT_API_CLIENT_ID = "")}}
+
+\item{client_secret}{The client secret of the app through which the API is
+accessed. If left empty, it will attempt to read from the environment. Can be
+set with\code{Sys.setenv(REDDIT_API_SECRET = "")}}
 }
 \value{
 A list containing the access token, the time until it expires, the
@@ -33,6 +43,5 @@ scope, the time it was generated and the useragent
 Generate an access token for the Reddit API
 }
 \details{
-Access tokens are only valid for an hour.
-More info at \url{https://www.reddit.com/dev/api/}
+
 }
