@@ -963,6 +963,12 @@ parse_response <- function(response,
 
   if("data" %in% names(response_json)){
     data <- response_json$data
+  } else {
+    is_df <- sapply(response_json, is.data.frame)
+
+    if(any(is_df)){
+      data <- response_json[which(is_df)]
+    }
   }
 
   if(length(data)>0){
