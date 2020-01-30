@@ -25,6 +25,11 @@ A dataframe with all trophies a specified user has received.
 \description{
 Get trophies for a specified user
 }
+\examples{
+\dontrun{
+trophies <- get_trophies(user = "PresidentObama",accesstoken = read_token)
+}
+}
 \seealso{
 \code{\link{get_user_info}}
 }

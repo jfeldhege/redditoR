@@ -42,3 +42,12 @@ A dataframe with new comments from a specified subreddit.
 \description{
 Get comments from a specified subreddit
 }
+\examples{
+\dontrun{
+
+#10 new comments from subreddit askreddit
+comms <- get_comments(subreddit = "askreddit",
+                      accesstoken = read_token,
+                      limit = 10)
+}
+}

@@ -3,15 +3,16 @@ Type: Package
 Title: Access the Reddit API
 Version: 0.1.0
 Authors@R: c(
-    person("Johannes", "Feldhege", email = "johannes.feldhege@med.uni-heidelberg.de", 
+    person("Johannes", "Feldhege", email = "feldhegege@psyres.de", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4665-5235")))
 Author: Johannes Feldhege [aut, cre]
-Maintainer: Johannes Feldhege <johannes.feldhege@med.uni-heidelberg.de>
+Maintainer: Johannes Feldhege <feldhege@psyres.de>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+BugReports: https://github.com/jfeldhege/redditR/issues
 Imports: 
     httr (>= 1.3.1),
     jsonlite (>= 1.6),

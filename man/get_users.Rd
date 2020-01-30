@@ -46,3 +46,15 @@ A dataframe of users.
 \description{
 Get a list of user accounts
 }
+\examples{
+\dontrun{
+#Find popular users
+popular_users <- get_users(type = "popular",
+                           accesstoken = read_token,
+                           limit = 10)
+#Find new user accounts
+new_users <- get_users(type = "new",
+                      accesstoken = read_token,
+                      limit = 100)
+}
+}

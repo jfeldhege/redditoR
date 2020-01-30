@@ -2,7 +2,7 @@
 % Please edit documentation in R/reddit_functions.R
 \name{get_user_info}
 \alias{get_user_info}
-\title{Get basic information about account for a specified user}
+\title{Get basic information about the account of a specified user}
 \usage{
 get_user_info(user, accesstoken, verbose = FALSE, retry = TRUE)
 }
@@ -23,5 +23,11 @@ requests.}
 A dataframe with information about a specified user.
 }
 \description{
-Get basic information about account for a specified user
+Get basic information about the account of a specified user
+}
+\examples{
+\dontrun{
+user_info <- get_user_info(user = "PresidentObama",
+                           accesstoken = read_token)
+}
 }

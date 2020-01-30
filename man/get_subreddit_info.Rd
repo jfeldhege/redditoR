@@ -40,12 +40,12 @@ Get basic information for a specified subreddit.
 \examples{
 \dontrun{
 read_token <- get_token(scope = "read",
-                                      useragent = useragent,
-                                      username = username,
-                                      password = password)
+                        useragent = useragent,
+                        username = username,
+                        password = password)
 
 sub_info <- get_subreddit_info(subreddit = "soccer",
                                accesstoken = read_token,
                                verbose = FALSE)
-                               }
+}
 }

@@ -33,7 +33,7 @@ empty, it will attempt to read from the environment. Can be set with
 
 \item{client_secret}{The client secret of the app through which the API is
 accessed. If left empty, it will attempt to read from the environment. Can be
-set with\code{Sys.setenv(REDDIT_API_SECRET = "")}}
+set with \code{Sys.setenv(REDDIT_API_SECRET = "")}}
 }
 \value{
 A list containing the access token, the time until it expires, the
@@ -43,5 +43,21 @@ scope, the time it was generated and the useragent
 Generate an access token for the Reddit API
 }
 \details{
-
+Access tokens are recquired to acccess any of the endpoints of the
+API. Access tokens are only valid for an hour.
+It is recquired to define an App through which the API is being accessed.
+Apps can be defined in the settings at this page
+\url{https://www.reddit.com/prefs/apps/}. Client ID and Client Secret must be
+taken from this page.
+More info about accessing the API at \url{https://www.reddit.com/dev/api/}
+}
+\examples{
+\dontrun{
+read_token <- get_token(scope = "read",
+                        useragent = useragent,
+                        username = username,
+                        password = password,
+                        client_id = client_id,
+                        client_secret = client_secret)
+}
 }

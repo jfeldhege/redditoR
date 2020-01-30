@@ -66,3 +66,12 @@ A dataframe of comments for the specified user.
 \description{
 Get comments from a specified user
 }
+\examples{
+\dontrun{
+#Get 10 comments made by Barack Obama
+obama_comments <- get_user_comments(user = "PresidentObama",
+                                    accesstoken = his_token,
+                                    sort = "top", time = "all",
+                                    limit = 10)
+}
+}

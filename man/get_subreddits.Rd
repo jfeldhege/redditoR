@@ -2,8 +2,7 @@
 % Please edit documentation in R/reddit_functions.R
 \name{get_subreddits}
 \alias{get_subreddits}
-\title{Get a dataframe of subreddits sorted by creation date or popularity. Also
-allows searching for subreddits}
+\title{Get a dataframe of subreddits}
 \usage{
 get_subreddits(
   type = c("popular", "new", "default", "search"),
@@ -56,6 +55,21 @@ requests.}
 A dataframe of subreddits.
 }
 \description{
-Get a dataframe of subreddits sorted by creation date or popularity. Also
-allows searching for subreddits
+Subreddits can be sorted by creation date or popularity. Also
+allows searching for subreddits with search queries.
+}
+\examples{
+\dontrun{
+#type = "popular" will show subreddits that are popular right now
+popular_subs <- get_subreddits(type = "popular",
+                              limit = 10,
+                              accesstoken = read_token)
+
+#Searches for subreddits can be performed with type "search"
+search_subs <- get_subreddits(type = "search",
+                             accesstoken = read_token,
+                             limit = 10,
+                             query = "soccer",
+                             sort = "activity")
+}
 }

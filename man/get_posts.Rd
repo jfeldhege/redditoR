@@ -65,8 +65,24 @@ requests.}
 A dataframe containg the requested posts
 }
 \description{
-Get posts from a specified subreddit
+A maximum of 100 posts can be requested from a specified subreddit. The
+timeframe and the sorting of the posts can be specified.
 }
 \details{
 More info at \url{https://www.reddit.com/dev/api/}
+}
+\examples{
+\dontrun{
+# 10 "hot" posts from the subreddit askreddit
+posts <- get_posts(subreddit = "askreddit",
+                   accesstoken = read_token,
+                   sort = "hot", limit = 10)
+
+# The next set of posts can be retrieved with the argument "after"
+posts_after <- get_posts(subreddit = "soccer",
+                         accesstoken = read_token,
+                         sort = "hot",
+                         limit = 10,
+                         after = after)
+}
 }

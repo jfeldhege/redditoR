@@ -74,8 +74,35 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe of posts or comments for the specified user.
+A dataframe of posts, comments or both for the specified user.
 }
 \description{
 Get posts and comments from a specified user
+}
+\examples{
+\dontrun{
+# overview returns posts and comments
+overview <- get_user(user = "PresidentObama",
+                     type = "overview",
+                     accesstoken = his_token,
+                     sort = "top", time = "all",
+                     limit = 10)
+
+# type = "comments" returns only comments
+user_comments <- get_user(user = "PresidentObama",
+                          type = "comments",
+                          accesstoken = his_token,
+                          sort = "top", time = "all",
+                          limit = 10)
+
+# type = "submitted" returns only posts
+user_comments <- get_user(user = "PresidentObama",
+                          type = "submitted",
+                          accesstoken = his_token,
+                          sort = "top", time = "all",
+                          limit = 10)
+}
+}
+\seealso{
+\code{\link{get_user_comments}} and \code{\link{get_submissions}}
 }

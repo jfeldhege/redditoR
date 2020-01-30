@@ -68,3 +68,14 @@ Get submissions for a specified user
 \details{
 More info at \url{https://www.reddit.com/dev/api/}
 }
+\examples{
+\dontrun{
+submissions <- get_submissions(user = "PresidentObama",
+                              accesstoken = his_token,
+                              sort = "top", time = "all",
+                              limit = 10)
+}
+}
+\seealso{
+\code{\link{get_user}}
+}
