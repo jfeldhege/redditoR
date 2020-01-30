@@ -14,14 +14,26 @@
 #' \code{Sys.setenv(REDDIT_API_CLIENT_ID = "")}
 #' @param client_secret The client secret of the app through which the API is
 #' accessed. If left empty, it will attempt to read from the environment. Can be
-#' set with\code{Sys.setenv(REDDIT_API_SECRET = "")}
+#' set with \code{Sys.setenv(REDDIT_API_SECRET = "")}
 #' @return A list containing the access token, the time until it expires, the
 #' scope, the time it was generated and the useragent
-#' @details Access tokens are only valid for an hour.
+#' @details Access tokens are recquired to acccess any of the endpoints of the
+#' API. Access tokens are only valid for an hour.
+#' It is recquired to define an App through which the API is being accessed.
 #' Apps can be defined in the settings at this page
-#' \url{https://www.reddit.com/prefs/apps/. Client ID and Client Secret must be
+#' \url{https://www.reddit.com/prefs/apps/}. Client ID and Client Secret must be
 #' taken from this page.
 #' More info about accessing the API at \url{https://www.reddit.com/dev/api/}
+#' @examples
+#' \dontrun{
+#' read_token <- get_token(scope = "read",
+#'                         useragent = useragent,
+#'                         username = username,
+#'                         password = password,
+#'                         client_id = client_id,
+#'                         client_secret = client_secret)
+#' }
+#' @export
 
 get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                        useragent,
@@ -77,6 +89,9 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 
 #' Get posts from a specified subreddit
 #'
+#' A maximum of 100 posts can be requested from a specified subreddit. The
+#' timeframe and the sorting of the posts can be specified.
+#'
 #' @param subreddit The name of the subreddit from which posts are requested.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"read"}.
@@ -114,6 +129,21 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #' requests.
 #' @return A dataframe containg the requested posts
 #' @details More info at \url{https://www.reddit.com/dev/api/}
+#' @examples
+#' \dontrun{
+#' # 10 "hot" posts from the subreddit askreddit
+#' posts <- get_posts(subreddit = "askreddit",
+#'                    accesstoken = read_token,
+#'                    sort = "hot", limit = 10)
+#'
+#' # The next set of posts can be retrieved with the argument "after"
+#' posts_after <- get_posts(subreddit = "soccer",
+#'                          accesstoken = read_token,
+#'                          sort = "hot",
+#'                          limit = 10,
+#'                          after = after)
+#' }
+#' @export
 
 get_posts <- function(subreddit,
                       accesstoken,
@@ -182,10 +212,17 @@ get_posts <- function(subreddit,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#'
 #' @return A dataframe of posts for a specified user.
 #' @export
 #' @details More info at \url{https://www.reddit.com/dev/api/}
+#' @seealso \code{\link{get_user}}
+#' @examples
+#' \dontrun{
+#'submissions <- get_submissions(user = "PresidentObama",
+#'                               accesstoken = his_token,
+#'                               sort = "top", time = "all",
+#'                               limit = 10)
+#' }
 
 
 get_submissions <- function (user,
@@ -212,11 +249,9 @@ get_submissions <- function (user,
 
   if(verbose == TRUE) print(paste("Getting submissions from:", link))
 
-  request <- make_request(accesstoken, link, verbose, retry)
+  resp <- make_request(accesstoken, link, verbose, retry)
 
-  resp <- jsonlite::fromJSON(httr::content(request, as="text"), flatten = TRUE)
-
-  submissions <- parse_response(resp,after_before = TRUE, verbose)
+  submissions <- parse_response(resp, after_before = TRUE, verbose)
 
   return(submissions)
 }
@@ -241,6 +276,14 @@ get_submissions <- function (user,
 #' requests.
 #' @return A dataframe with new comments from a specified subreddit.
 #' @export
+#' @examples
+#' \dontrun{
+#'
+#' #10 new comments from subreddit askreddit
+#' comms <- get_comments(subreddit = "askreddit",
+#'                       accesstoken = read_token,
+#'                       limit = 10)
+#' }
 
 get_comments <- function (subreddit,
                           accesstoken,
@@ -306,6 +349,14 @@ get_comments <- function (subreddit,
 #' requests.
 #' @return A dataframe of comments for the specified user.
 #' @export
+#' @examples
+#' \dontrun{
+#' #Get 10 comments made by Barack Obama
+#' obama_comments <- get_user_comments(user = "PresidentObama",
+#'                                     accesstoken = his_token,
+#'                                     sort = "top", time = "all",
+#'                                     limit = 10)
+#' }
 
 
 get_user_comments <- function (user,
@@ -387,8 +438,32 @@ get_user_comments <- function (user,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe of posts or comments for the specified user.
+#' @return A dataframe of posts, comments or both for the specified user.
+#' @seealso \code{\link{get_user_comments}} and \code{\link{get_submissions}}
 #' @export
+#' @examples
+#' \dontrun{
+#' # overview returns posts and comments
+#' overview <- get_user(user = "PresidentObama",
+#'                      type = "overview",
+#'                      accesstoken = his_token,
+#'                      sort = "top", time = "all",
+#'                      limit = 10)
+#'
+#' # type = "comments" returns only comments
+#' user_comments <- get_user(user = "PresidentObama",
+#'                           type = "comments",
+#'                           accesstoken = his_token,
+#'                           sort = "top", time = "all",
+#'                           limit = 10)
+#'
+#' # type = "submitted" returns only posts
+#' user_comments <- get_user(user = "PresidentObama",
+#'                           type = "submitted",
+#'                           accesstoken = his_token,
+#'                           sort = "top", time = "all",
+#'                           limit = 10)
+#' }
 
 
 get_user <- function (user,
@@ -427,7 +502,7 @@ get_user <- function (user,
 }
 
 
-#' Get basic information about account for a specified user
+#' Get basic information about the account of a specified user
 #'
 #' @param user Username of the Reddit user that is requested.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
@@ -439,6 +514,11 @@ get_user <- function (user,
 #' requests.
 #' @return A dataframe with information about a specified user.
 #' @export
+#' @examples
+#' \dontrun{
+#' user_info <- get_user_info(user = "PresidentObama",
+#'                            accesstoken = read_token)
+#' }
 
 
 get_user_info <- function (user,
@@ -487,14 +567,14 @@ get_user_info <- function (user,
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
-#'                                       useragent = useragent,
-#'                                       username = username,
-#'                                       password = password)
+#'                         useragent = useragent,
+#'                         username = username,
+#'                         password = password)
 #'
 #' sub_info <- get_subreddit_info(subreddit = "soccer",
 #'                                accesstoken = read_token,
 #'                                verbose = FALSE)
-#'                                }
+#'}
 
 get_subreddit_info <- function (subreddit,
                                 type = c("info", "moderators", "rules"),
@@ -592,6 +672,10 @@ get_wiki <- function (subreddit,
 #' @return A dataframe with all trophies a specified user has received.
 #' @export
 #' @seealso \code{\link{get_user_info}}
+#' @examples
+#' \dontrun{
+#' trophies <- get_trophies(user = "PresidentObama",accesstoken = read_token)
+#' }
 
 get_trophies <- function (user,
                           accesstoken,
@@ -618,8 +702,10 @@ get_trophies <- function (user,
 
 
 
-#' Get a dataframe of subreddits sorted by creation date or popularity. Also
-#' allows searching for subreddits
+#' Get a dataframe of subreddits
+#'
+#' Subreddits can be sorted by creation date or popularity. Also
+#' allows searching for subreddits with search queries.
 #'
 #' @param type The type of list that is requested. Possible values are:
 #' \itemize{
@@ -649,6 +735,20 @@ get_trophies <- function (user,
 #' @return A dataframe of subreddits.
 #' @export
 #'
+#'@examples
+#'\dontrun{
+#'#type = "popular" will show subreddits that are popular right now
+#'popular_subs <- get_subreddits(type = "popular",
+#'                               limit = 10,
+#'                               accesstoken = read_token)
+#'
+#'#Searches for subreddits can be performed with type "search"
+#'search_subs <- get_subreddits(type = "search",
+#'                              accesstoken = read_token,
+#'                              limit = 10,
+#'                              query = "soccer",
+#'                              sort = "activity")
+#'}
 
 get_subreddits <- function (type = c("popular", "new", "default", "search"),
                             accesstoken,
@@ -711,7 +811,17 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 #' requests.
 #' @return A dataframe of users.
 #' @export
-#'
+#' @examples
+#' \dontrun{
+#' #Find popular users
+#' popular_users <- get_users(type = "popular",
+#'                            accesstoken = read_token,
+#'                            limit = 10)
+#'#Find new user accounts
+#'new_users <- get_users(type = "new",
+#'                       accesstoken = read_token,
+#'                       limit = 100)
+#'}
 
 get_users <- function(type = c("popular", "new"),
                       accesstoken,
