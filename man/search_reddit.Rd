@@ -2,7 +2,7 @@
 % Please edit documentation in R/reddit_functions.R
 \name{search_reddit}
 \alias{search_reddit}
-\title{Search for posts in a subreddit or all of reddit}
+\title{Search for posts}
 \usage{
 search_reddit(
   query,
@@ -66,9 +66,28 @@ request. Search results after this post in the listing are returned.}
 A dataframe with posts matching the search query.
 }
 \description{
-Search for posts in a subreddit or all of reddit
+Searches can be confined to one subreddit or conducted in all of reddit.
 }
 \details{
+A '+' has to be put between multiple search terms in the query.
 Information on how to build advanced search queries can be found at
 this link: \url{https://www.reddit.com/wiki/search}
+}
+\examples{
+\dontrun{
+#Search un a subreddit
+search_results_movies <- search_reddit(subreddit = "movies",
+                                accesstoken = read_token,
+                                query = "Keanu+Reeves",
+                                sort = "relevance",
+                                limit = 10,
+                                time = "year")
+
+# Search all of reddit
+search_results_reddit <- search_reddit(subreddit = NULL,
+                                      accesstoken = read_token,
+                                      query = "Keanu+Reeves",
+                                      sort = "relevance",
+                                      limit = 10)
+}
 }

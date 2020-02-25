@@ -4,7 +4,7 @@
 \alias{get_wiki}
 \title{Get wiki pages for a specified subreddit.}
 \usage{
-get_wiki(subreddit, page = "all", accesstoken, verbose = FALSE, retry = TRUE)
+get_wiki(subreddit, page = "all", accesstoken, verbose = FALSE, retry = FALSE)
 }
 \arguments{
 \item{subreddit}{Name of the subreddit for which wiki pages are requested.}
@@ -29,6 +29,26 @@ all wiki pages.
 }
 \description{
 Get wiki pages for a specified subreddit.
+}
+\examples{
+\dontrun{
+wiki_token <- get_token(scope = "wikiread",
+                        useragent = useragent,
+                        username = username,
+                        password = password,
+                        client_id = client_id,
+                        client_secret = client_secret)
+
+#All wiki pages of a subreddit
+soccer_wiki <- get_wiki(subreddit = "soccer",
+                       page = "all",
+                       accesstoken = wiki_token)
+
+#Access a specific wiki page
+soccer_wiki_page <- get_wiki(subreddit = "soccer",
+                            page = soccer_wiki[1,1],
+                            accesstoken = wiki_token)
+}
 }
 \seealso{
 \code{\link{get_subreddit_info}}

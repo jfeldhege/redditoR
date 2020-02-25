@@ -11,7 +11,7 @@ get_comments(
   before = NULL,
   after = NULL,
   verbose = FALSE,
-  retry = TRUE
+  retry = FALSE
 )
 }
 \arguments{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/reddit_functions.R
 \name{get_users}
 \alias{get_users}
-\title{Get a list of user accounts}
+\title{Get user accounts}
 \usage{
 get_users(
   type = c("popular", "new"),
@@ -11,11 +11,11 @@ get_users(
   after = NULL,
   before = NULL,
   verbose = FALSE,
-  retry = TRUE
+  retry = FALSE
 )
 }
 \arguments{
-\item{type}{The type of list that is requested. Possible values are:
+\item{type}{The type of users that is requested. Possible values are:
 \itemize{
   \item \code{popular} User accounts that are popular right now
   \item \code{new} Newly created user accounts
@@ -44,7 +44,7 @@ requests.}
 A dataframe of users.
 }
 \description{
-Get a list of user accounts
+Searches for popular or new users and returns them as a dataframe.
 }
 \examples{
 \dontrun{

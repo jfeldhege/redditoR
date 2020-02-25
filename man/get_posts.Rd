@@ -12,8 +12,8 @@ get_posts(
   time = NULL,
   after = NULL,
   before = NULL,
-  verbose = TRUE,
-  retry = TRUE
+  verbose = FALSE,
+  retry = FALSE
 )
 }
 \arguments{

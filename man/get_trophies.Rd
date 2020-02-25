@@ -4,7 +4,7 @@
 \alias{get_trophies}
 \title{Get trophies for a specified user}
 \usage{
-get_trophies(user, accesstoken, verbose = FALSE, retry = TRUE)
+get_trophies(user, accesstoken, verbose = FALSE, retry = FALSE)
 }
 \arguments{
 \item{user}{The username of the user}
@@ -27,7 +27,7 @@ Get trophies for a specified user
 }
 \examples{
 \dontrun{
-trophies <- get_trophies(user = "PresidentObama",accesstoken = read_token)
+trophies <- get_trophies(user = "_KeanuReeves",accesstoken = read_token)
 }
 }
 \seealso{

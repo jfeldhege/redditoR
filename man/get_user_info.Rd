@@ -4,7 +4,7 @@
 \alias{get_user_info}
 \title{Get basic information about the account of a specified user}
 \usage{
-get_user_info(user, accesstoken, verbose = FALSE, retry = TRUE)
+get_user_info(user, accesstoken, verbose = FALSE, retry = FALSE)
 }
 \arguments{
 \item{user}{Username of the Reddit user that is requested.}
@@ -27,7 +27,7 @@ Get basic information about the account of a specified user
 }
 \examples{
 \dontrun{
-user_info <- get_user_info(user = "PresidentObama",
+user_info <- get_user_info(user = "_KeanuReeves",
                            accesstoken = read_token)
 }
 }

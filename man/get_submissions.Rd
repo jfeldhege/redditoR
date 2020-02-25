@@ -13,7 +13,7 @@ get_submissions(
   before = NULL,
   after = NULL,
   verbose = FALSE,
-  retry = TRUE
+  retry = FALSE
 )
 }
 \arguments{
@@ -63,15 +63,23 @@ requests.}
 A dataframe of posts for a specified user.
 }
 \description{
-Get submissions for a specified user
+Submissions are posts made by one user. Submissions can be requested for a
+specific timeframe or sort order.
 }
 \details{
 More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{
-submissions <- get_submissions(user = "PresidentObama",
-                              accesstoken = his_token,
+history_token <- get_token(scope = "history",
+                           useragent = useragent,
+                           username = username,
+                           password = password,
+                           client_id = client_id,
+                           client_secret = client_secret)
+
+submissions <- get_submissions(user = "_KeanuReeves",
+                              accesstoken = history_token,
                               sort = "top", time = "all",
                               limit = 10)
 }

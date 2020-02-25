@@ -13,7 +13,7 @@ get_user_comments(
   after = NULL,
   before = NULL,
   verbose = FALSE,
-  retry = TRUE
+  retry = FALSE
 )
 }
 \arguments{
@@ -64,13 +64,21 @@ requests.}
 A dataframe of comments for the specified user.
 }
 \description{
-Get comments from a specified user
+This returns comments made by one user. Comments can be requested for a
+specific timeframe or sort order.
 }
 \examples{
 \dontrun{
-#Get 10 comments made by Barack Obama
-obama_comments <- get_user_comments(user = "PresidentObama",
-                                    accesstoken = his_token,
+history_token <- get_token(scope = "history",
+                           useragent = useragent,
+                           username = username,
+                           password = password,
+                           client_id = client_id,
+                           client_secret = client_secret)
+
+#Get 10 comments made by Keanu Reeves
+keanu_comments <- get_user_comments(user = "_KeanuReeves",
+                                    accesstoken = history_token,
                                     sort = "top", time = "all",
                                     limit = 10)
 }

@@ -14,7 +14,7 @@ get_user(
   before = NULL,
   after = NULL,
   verbose = FALSE,
-  retry = TRUE
+  retry = FALSE
 )
 }
 \arguments{
@@ -77,30 +77,46 @@ requests.}
 A dataframe of posts, comments or both for the specified user.
 }
 \description{
-Get posts and comments from a specified user
+This function returns posts and/or comments made by one user. They can be
+requested for a specific timeframe or sort order.
 }
 \examples{
 \dontrun{
+history_token <- get_token(scope = "history",
+                           useragent = useragent,
+                           username = username,
+                           password = password,
+                           client_id = client_id,
+                           client_secret = client_secret)
+
 # overview returns posts and comments
-overview <- get_user(user = "PresidentObama",
+overview <- get_user(user = "_KeanuReeves",
                      type = "overview",
-                     accesstoken = his_token,
+                     accesstoken = history_token,
                      sort = "top", time = "all",
                      limit = 10)
 
 # type = "comments" returns only comments
-user_comments <- get_user(user = "PresidentObama",
+user_comments <- get_user(user = "_KeanuReeves",
                           type = "comments",
-                          accesstoken = his_token,
+                          accesstoken = history_token,
                           sort = "top", time = "all",
                           limit = 10)
 
 # type = "submitted" returns only posts
-user_comments <- get_user(user = "PresidentObama",
+user_comments <- get_user(user = "_KeanuReeves",
                           type = "submitted",
-                          accesstoken = his_token,
+                          accesstoken = history_token,
                           sort = "top", time = "all",
                           limit = 10)
+
+#
+gilded <- get_user(user = "_KeanuReeves",
+                  type = "gilded",
+                  accesstoken = history_token,
+                  sort = "hot",
+                  time = "all",
+                  limit = 10)
 }
 }
 \seealso{

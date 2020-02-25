@@ -13,7 +13,7 @@ get_subreddits(
   after = NULL,
   before = NULL,
   verbose = FALSE,
-  retry = TRUE
+  retry = FALSE
 )
 }
 \arguments{

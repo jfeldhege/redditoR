@@ -9,7 +9,7 @@ get_subreddit_info(
   type = c("info", "moderators", "rules"),
   accesstoken,
   verbose = FALSE,
-  retry = TRUE
+  retry = FALSE
 )
 }
 \arguments{
@@ -40,12 +40,18 @@ Get basic information for a specified subreddit.
 \examples{
 \dontrun{
 read_token <- get_token(scope = "read",
-                        useragent = useragent,
-                        username = username,
-                        password = password)
+                        useragent,
+                        username,
+                        password,
+                        client_id,
+                        client_secret)
 
 sub_info <- get_subreddit_info(subreddit = "soccer",
-                               accesstoken = read_token,
-                               verbose = FALSE)
+                               type = "info",
+                               accesstoken = read_token)
+
+moderators <- get_subreddit_info(subreddit = "soccer",
+                                type = "moderators",
+                                accesstoken = read_token)
 }
 }
