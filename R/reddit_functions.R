@@ -152,8 +152,8 @@ get_posts <- function(subreddit,
                       time = NULL,
                       after = NULL,
                       before = NULL,
-                      verbose = TRUE,
-                      retry = TRUE) {
+                      verbose = FALSE,
+                      retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -178,6 +178,9 @@ get_posts <- function(subreddit,
 
 
 #' Get submissions for a specified user
+#'
+#' Submissions are posts made by one user. Submissions can be requested for a
+#' specific timeframe or sort order.
 #'
 #' @param user The username of the user for which submissions are requested.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
@@ -218,8 +221,15 @@ get_posts <- function(subreddit,
 #' @seealso \code{\link{get_user}}
 #' @examples
 #' \dontrun{
-#'submissions <- get_submissions(user = "PresidentObama",
-#'                               accesstoken = his_token,
+#' history_token <- get_token(scope = "history",
+#'                            useragent = useragent,
+#'                            username = username,
+#'                            password = password,
+#'                            client_id = client_id,
+#'                            client_secret = client_secret)
+#'
+#'submissions <- get_submissions(user = "_KeanuReeves",
+#'                               accesstoken = history_token,
 #'                               sort = "top", time = "all",
 #'                               limit = 10)
 #' }
@@ -233,7 +243,7 @@ get_submissions <- function (user,
                              before = NULL,
                              after = NULL,
                              verbose = FALSE,
-                             retry = TRUE) {
+                             retry = FALSE) {
 
   check_token(accesstoken, scope = "history")
 
@@ -291,7 +301,7 @@ get_comments <- function (subreddit,
                           before=NULL,
                           after=NULL,
                           verbose = FALSE,
-                          retry = TRUE) {
+                          retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -312,6 +322,9 @@ get_comments <- function (subreddit,
 
 
 #' Get comments from a specified user
+#'
+#' This returns comments made by one user. Comments can be requested for a
+#' specific timeframe or sort order.
 #'
 #' @param user The username of the user for which comments are requested.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
@@ -351,9 +364,16 @@ get_comments <- function (subreddit,
 #' @export
 #' @examples
 #' \dontrun{
-#' #Get 10 comments made by Barack Obama
-#' obama_comments <- get_user_comments(user = "PresidentObama",
-#'                                     accesstoken = his_token,
+#' history_token <- get_token(scope = "history",
+#'                            useragent = useragent,
+#'                            username = username,
+#'                            password = password,
+#'                            client_id = client_id,
+#'                            client_secret = client_secret)
+#'
+#' #Get 10 comments made by Keanu Reeves
+#' keanu_comments <- get_user_comments(user = "_KeanuReeves",
+#'                                     accesstoken = history_token,
 #'                                     sort = "top", time = "all",
 #'                                     limit = 10)
 #' }
@@ -367,7 +387,7 @@ get_user_comments <- function (user,
                                after=NULL,
                                before=NULL,
                                verbose = FALSE,
-                               retry = TRUE) {
+                               retry = FALSE) {
 
   check_token(accesstoken, scope = "history")
 
@@ -392,6 +412,9 @@ get_user_comments <- function (user,
 
 
 #' Get posts and comments from a specified user
+#'
+#' This function returns posts and/or comments made by one user. They can be
+#' requested for a specific timeframe or sort order.
 #'
 #' @param user The username of the user for which posts and comments are
 #' requested.
@@ -443,26 +466,41 @@ get_user_comments <- function (user,
 #' @export
 #' @examples
 #' \dontrun{
+#' history_token <- get_token(scope = "history",
+#'                            useragent = useragent,
+#'                            username = username,
+#'                            password = password,
+#'                            client_id = client_id,
+#'                            client_secret = client_secret)
+#'
 #' # overview returns posts and comments
-#' overview <- get_user(user = "PresidentObama",
+#' overview <- get_user(user = "_KeanuReeves",
 #'                      type = "overview",
-#'                      accesstoken = his_token,
+#'                      accesstoken = history_token,
 #'                      sort = "top", time = "all",
 #'                      limit = 10)
 #'
 #' # type = "comments" returns only comments
-#' user_comments <- get_user(user = "PresidentObama",
+#' user_comments <- get_user(user = "_KeanuReeves",
 #'                           type = "comments",
-#'                           accesstoken = his_token,
+#'                           accesstoken = history_token,
 #'                           sort = "top", time = "all",
 #'                           limit = 10)
 #'
 #' # type = "submitted" returns only posts
-#' user_comments <- get_user(user = "PresidentObama",
+#' user_comments <- get_user(user = "_KeanuReeves",
 #'                           type = "submitted",
-#'                           accesstoken = his_token,
+#'                           accesstoken = history_token,
 #'                           sort = "top", time = "all",
 #'                           limit = 10)
+#'
+#'#
+#'gilded <- get_user(user = "_KeanuReeves",
+#'                   type = "gilded",
+#'                   accesstoken = history_token,
+#'                   sort = "hot",
+#'                   time = "all",
+#'                   limit = 10)
 #' }
 
 
@@ -475,7 +513,7 @@ get_user <- function (user,
                       before=NULL,
                       after=NULL,
                       verbose = FALSE,
-                      retry = TRUE) {
+                      retry = FALSE) {
 
   check_token(accesstoken, scope = "history")
 
@@ -516,7 +554,7 @@ get_user <- function (user,
 #' @export
 #' @examples
 #' \dontrun{
-#' user_info <- get_user_info(user = "PresidentObama",
+#' user_info <- get_user_info(user = "_KeanuReeves",
 #'                            accesstoken = read_token)
 #' }
 
@@ -524,7 +562,7 @@ get_user <- function (user,
 get_user_info <- function (user,
                            accesstoken,
                            verbose = FALSE,
-                           retry = TRUE) {
+                           retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -567,20 +605,26 @@ get_user_info <- function (user,
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
-#'                         useragent = useragent,
-#'                         username = username,
-#'                         password = password)
+#'                         useragent,
+#'                         username,
+#'                         password,
+#'                         client_id,
+#'                         client_secret)
 #'
 #' sub_info <- get_subreddit_info(subreddit = "soccer",
-#'                                accesstoken = read_token,
-#'                                verbose = FALSE)
+#'                                type = "info",
+#'                                accesstoken = read_token)
+#'
+#'moderators <- get_subreddit_info(subreddit = "soccer",
+#'                                 type = "moderators",
+#'                                 accesstoken = read_token)
 #'}
 
 get_subreddit_info <- function (subreddit,
                                 type = c("info", "moderators", "rules"),
                                 accesstoken,
                                 verbose = FALSE,
-                                retry = TRUE) {
+                                retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -626,12 +670,31 @@ get_subreddit_info <- function (subreddit,
 #' @export
 #'
 #' @seealso \code{\link{get_subreddit_info}}
+#' @examples
+#' \dontrun{
+#' wiki_token <- get_token(scope = "wikiread",
+#'                         useragent = useragent,
+#'                         username = username,
+#'                         password = password,
+#'                         client_id = client_id,
+#'                         client_secret = client_secret)
+#'
+#'#All wiki pages of a subreddit
+#'soccer_wiki <- get_wiki(subreddit = "soccer",
+#'                        page = "all",
+#'                        accesstoken = wiki_token)
+#'
+#'#Access a specific wiki page
+#'soccer_wiki_page <- get_wiki(subreddit = "soccer",
+#'                             page = soccer_wiki[1,1],
+#'                             accesstoken = wiki_token)
+#'}
 
 get_wiki <- function (subreddit,
                       page = "all",
                       accesstoken,
                       verbose = FALSE,
-                      retry = TRUE) {
+                      retry = FALSE) {
 
   check_token(accesstoken, scope = "wikiread")
 
@@ -674,13 +737,13 @@ get_wiki <- function (subreddit,
 #' @seealso \code{\link{get_user_info}}
 #' @examples
 #' \dontrun{
-#' trophies <- get_trophies(user = "PresidentObama",accesstoken = read_token)
+#' trophies <- get_trophies(user = "_KeanuReeves",accesstoken = read_token)
 #' }
 
 get_trophies <- function (user,
                           accesstoken,
                           verbose = FALSE,
-                          retry = TRUE) {
+                          retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -758,7 +821,7 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
                             after = NULL,
                             before = NULL,
                             verbose = FALSE,
-                            retry = TRUE) {
+                            retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -772,10 +835,10 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 
   link <- build_link(path_elements = paste0("subreddits/", type),
                      query_elements = paste0("limit=",limit,  "&q=", query,
-                                             "&sort", sort),
+                                             "&sort=", sort),
                      before = before, after = after)
 
-  if(verbose == TRUE) print(paste("Getting subreddit info from:", link))
+  if(verbose == TRUE) print(paste("Getting subreddits from:", link))
 
   resp <- make_request(accesstoken, link, verbose, retry)
 
@@ -789,9 +852,11 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 
 
 
-#' Get a list of user accounts
+#' Get user accounts
 #'
-#' @param type The type of list that is requested. Possible values are:
+#' Searches for popular or new users and returns them as a dataframe.
+#'
+#' @param type The type of users that is requested. Possible values are:
 #' \itemize{
 #'   \item \code{popular} User accounts that are popular right now
 #'   \item \code{new} Newly created user accounts
@@ -829,7 +894,7 @@ get_users <- function(type = c("popular", "new"),
                       after = NULL,
                       before = NULL,
                       verbose = FALSE,
-                      retry = TRUE) {
+                      retry = FALSE) {
 
   check_token(accesstoken, scope = "read")
 
@@ -855,7 +920,9 @@ get_users <- function(type = c("popular", "new"),
 
 
 
-#' Search for posts in a subreddit or all of reddit
+#' Search for posts
+#'
+#' Searches can be confined to one subreddit or conducted in all of reddit.
 #'
 #' @param query The search query. Maximum length of the query is 512 characters.
 #' @param subreddit The name of the subreddit in which the search should be
@@ -895,10 +962,28 @@ get_users <- function(type = c("popular", "new"),
 #' requests.
 #'
 #' @return A dataframe with posts matching the search query.
-#' @export
 #'
-#' @details Information on how to build advanced search queries can be found at
+#' @details A '+' has to be put between multiple search terms in the query.
+#' Information on how to build advanced search queries can be found at
 #' this link: \url{https://www.reddit.com/wiki/search}
+#' @export
+#' @examples
+#' \dontrun{
+#' #Search un a subreddit
+#' search_results_movies <- search_reddit(subreddit = "movies",
+#'                                 accesstoken = read_token,
+#'                                 query = "Keanu+Reeves",
+#'                                 sort = "relevance",
+#'                                 limit = 10,
+#'                                 time = "year")
+#'
+#'# Search all of reddit
+#'search_results_reddit <- search_reddit(subreddit = NULL,
+#'                                       accesstoken = read_token,
+#'                                       query = "Keanu+Reeves",
+#'                                       sort = "relevance",
+#'                                       limit = 10)
+#' }
 
 search_reddit <- function(query,
                           accesstoken,
@@ -1014,17 +1099,17 @@ build_link <-  function(path_elements,
                         before = NULL,
                         after = NULL){
 
-  url <- httr::parse_url("https://oauth.reddit.com/")
+  base_url <- ("https://oauth.reddit.com/")
 
-  url$path <- paste0(path_elements, ".json")
+  path <- paste0(path_elements, ".json")
 
   if(is.null(before) & !is.null(after)){
 
-    url$query <- paste0(query_elements, "&after=", after)
+    query <- paste0(query_elements, "&after=", after)
 
   } else if (!is.null(before) & is.null(after)) {
 
-    url$query <- paste0(query_elements, "&before=", before)
+    query <- paste0(query_elements, "&before=", before)
 
   } else if(!is.null(before) & !is.null(after)){
 
@@ -1032,10 +1117,10 @@ build_link <-  function(path_elements,
 
   } else if(is.null(before) & is.null(after)){
 
-    url$query <- query_elements
+    query <- query_elements
   }
 
-  link <- httr::build_url(url)
+  link <- httr::modify_url(base_url, path = path, query = query)
 
   return(link)
 }
@@ -1059,6 +1144,10 @@ make_request <- function(accesstoken,
 
 
   httr::stop_for_status(request)
+
+  if (httr::http_type(request) != "application/json") {
+    stop("reddit API did not return a json object", call. = FALSE)
+  }
 
   if(verbose == TRUE) print(httr::http_status(request)$message)
 
