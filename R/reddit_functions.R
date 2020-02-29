@@ -378,11 +378,11 @@ get_comments <- function (subreddit,
 #' @examples
 #' \dontrun{
 #' history_token <- get_token(scope = "history",
-#'                            useragent = useragent,
-#'                            username = username,
-#'                            password = password,
-#'                            client_id = client_id,
-#'                            client_secret = client_secret)
+#'                            useragent = my_useragent,
+#'                            username = my_username,
+#'                            password = my_password,
+#'                            client_id = my_client_id,
+#'                            client_secret = my_client_secret)
 #'
 #' #Get 10 comments made by Keanu Reeves
 #' keanu_comments <- get_user_comments(user = "_KeanuReeves",
@@ -480,11 +480,11 @@ get_user_comments <- function (user,
 #' @examples
 #' \dontrun{
 #' history_token <- get_token(scope = "history",
-#'                            useragent = useragent,
-#'                            username = username,
-#'                            password = password,
-#'                            client_id = client_id,
-#'                            client_secret = client_secret)
+#'                            useragent = my_useragent,
+#'                            username = my_username,
+#'                            password = my_password,
+#'                            client_id = my_client_id,
+#'                            client_secret = my_client_secret)
 #'
 #' # overview returns posts and comments
 #' overview <- get_user(user = "_KeanuReeves",
@@ -631,10 +631,12 @@ get_user_info <- function (user,
 #'                         client_id = my_client_id,
 #'                         client_secret = my_client_secret)
 #'
+#'#Get sidebar for subreddit "soccer"
 #' sub_info <- get_subreddit_info(subreddit = "soccer",
 #'                                type = "info",
 #'                                accesstoken = read_token)
 #'
+#'#Get moderators for subreddit "soccer"
 #'moderators <- get_subreddit_info(subreddit = "soccer",
 #'                                 type = "moderators",
 #'                                 accesstoken = read_token)
