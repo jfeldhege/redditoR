@@ -131,6 +131,13 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
 #' # 10 "hot" posts from the subreddit askreddit
 #' posts <- get_posts(subreddit = "askreddit",
 #'                    accesstoken = read_token,
@@ -288,7 +295,13 @@ get_submissions <- function (user,
 #' @export
 #' @examples
 #' \dontrun{
-#'
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
 #' #10 new comments from subreddit askreddit
 #' comms <- get_comments(subreddit = "askreddit",
 #'                       accesstoken = read_token,
@@ -554,6 +567,13 @@ get_user <- function (user,
 #' @export
 #' @examples
 #' \dontrun{
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
 #' user_info <- get_user_info(user = "_KeanuReeves",
 #'                            accesstoken = read_token)
 #' }
@@ -605,11 +625,11 @@ get_user_info <- function (user,
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
-#'                         useragent,
-#'                         username,
-#'                         password,
-#'                         client_id,
-#'                         client_secret)
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
 #'
 #' sub_info <- get_subreddit_info(subreddit = "soccer",
 #'                                type = "info",
@@ -673,11 +693,11 @@ get_subreddit_info <- function (subreddit,
 #' @examples
 #' \dontrun{
 #' wiki_token <- get_token(scope = "wikiread",
-#'                         useragent = useragent,
-#'                         username = username,
-#'                         password = password,
-#'                         client_id = client_id,
-#'                         client_secret = client_secret)
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
 #'
 #'#All wiki pages of a subreddit
 #'soccer_wiki <- get_wiki(subreddit = "soccer",
@@ -737,6 +757,13 @@ get_wiki <- function (subreddit,
 #' @seealso \code{\link{get_user_info}}
 #' @examples
 #' \dontrun{
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
 #' trophies <- get_trophies(user = "_KeanuReeves",accesstoken = read_token)
 #' }
 
@@ -800,6 +827,13 @@ get_trophies <- function (user,
 #'
 #'@examples
 #'\dontrun{
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
 #'#type = "popular" will show subreddits that are popular right now
 #'popular_subs <- get_subreddits(type = "popular",
 #'                               limit = 10,
@@ -878,6 +912,13 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 #' @export
 #' @examples
 #' \dontrun{
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
 #' #Find popular users
 #' popular_users <- get_users(type = "popular",
 #'                            accesstoken = read_token,
@@ -969,7 +1010,14 @@ get_users <- function(type = c("popular", "new"),
 #' @export
 #' @examples
 #' \dontrun{
-#' #Search un a subreddit
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
+#' #Search for posts in a single subreddit
 #' search_results_movies <- search_reddit(subreddit = "movies",
 #'                                 accesstoken = read_token,
 #'                                 query = "Keanu+Reeves",
@@ -977,7 +1025,7 @@ get_users <- function(type = c("popular", "new"),
 #'                                 limit = 10,
 #'                                 time = "year")
 #'
-#'# Search all of reddit
+#'# Search for posts in all of reddit
 #'search_results_reddit <- search_reddit(subreddit = NULL,
 #'                                       accesstoken = read_token,
 #'                                       query = "Keanu+Reeves",
