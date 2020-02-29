@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# redditR: An R wrapper for reddit
+# redditoR: An R wrapper for reddit
 
 <!-- badges: start -->
 
@@ -9,7 +9,7 @@
 
 ## Introduction
 
-The goal of redditR is to provide an R wrapper to the API of
+The goal of redditoR is to provide an R wrapper to the API of
 [reddit.com](https://reddit.com). You need to have an account with
 reddit to use redditR. Additionally, an app needs to be defined in the
 settings of your account [here](https://www.reddit.com/prefs/apps/).
@@ -24,7 +24,7 @@ You can install the current version version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jfeldhege/redditR")
+devtools::install_github("jfeldhege/redditoR")
 ```
 
 ## Example
@@ -33,7 +33,7 @@ This is an example workflow to access data through the reddit API:
 
 ``` r
 #Load the package
-library(redditR)
+library(redditoR)
 
 # Get a token for the scope "read" with the username and password of your account, 
 #the client id and secret of your app and a useragent.
@@ -69,6 +69,6 @@ top_comments <- get_user(user = "PresidentObama",
 ## Meta
 
   - Please report any [issues or
-    bugs](https://github.com/jfeldhege/redditR/issues).
-  - License:
-  - Cite with `citation('redditR')`
+    bugs](https://github.com/jfeldhege/redditoR/issues).
+  - License: GPL-3
+  - Cite with `citation('redditoR')`
