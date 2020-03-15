@@ -8,7 +8,7 @@ citEntry(
   year     = 2020,
   url      = "https://github.com/jfeldhege/redditoR/",
   textVersion = paste(
-
+"Feldhege, J. (2020).redditoR: Access the Reddit API. URL: https://github.com/jfeldhege/redditoR/"
   )
 )
 
