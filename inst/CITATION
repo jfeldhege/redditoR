@@ -1,0 +1,14 @@
+citHeader("To cite redditoR in publications use:")
+
+citEntry(
+  entry    = "manual",
+  title    = "redditoR: Access the Reddit API",
+  author   = person(given = "Johannes",
+                    family = "Feldhege"),
+  year     = 2020,
+  url      = "https://github.com/jfeldhege/redditoR/",
+  textVersion = paste(
+
+  )
+)
+
