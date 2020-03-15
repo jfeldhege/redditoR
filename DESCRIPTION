@@ -7,8 +7,8 @@ Authors@R: c(
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4665-5235")))
 Author: Johannes Feldhege [aut, cre]
 Maintainer: Johannes Feldhege <feldhege@psyres.de>
-Description: A collection of functions to access the API of 
-<https://www.reddit.com/> and extract data from a number of endpoints.
+Description: A collection of functions to access the reddit API and extract data 
+             from a number of endpoints.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
