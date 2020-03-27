@@ -4,13 +4,24 @@
 \alias{get_user_info}
 \title{Get basic information about the account of a specified user}
 \usage{
-get_user_info(user, accesstoken, verbose = FALSE, retry = FALSE)
+get_user_info(
+  user,
+  accesstoken,
+  output = c("df", "json", "all"),
+  verbose = FALSE,
+  retry = FALSE
+)
 }
 \arguments{
 \item{user}{Username of the Reddit user that is requested.}
 
 \item{accesstoken}{The accesstoken required to access the endpoint. Scope
 must be \code{"read"}.}
+
+\item{output}{What the function should return. Choose \code{json} for an 
+unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+and \code{all} for a list containg the json object, a dataframe, and the 
+before and after anchors (if those exist for the endpoint).}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
@@ -27,6 +38,13 @@ Get basic information about the account of a specified user
 }
 \examples{
 \dontrun{
+read_token <- get_token(scope = "read",
+                        useragent = my_useragent,
+                        username = my_username,
+                        password = my_password,
+                        client_id = my_client_id,
+                        client_secret = my_client_secret)
+                        
 user_info <- get_user_info(user = "_KeanuReeves",
                            accesstoken = read_token)
 }

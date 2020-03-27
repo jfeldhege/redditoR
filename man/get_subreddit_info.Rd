@@ -8,6 +8,7 @@ get_subreddit_info(
   subreddit,
   type = c("info", "moderators", "rules"),
   accesstoken,
+  output = c("df", "json", "all"),
   verbose = FALSE,
   retry = FALSE
 )
@@ -22,6 +23,11 @@ subreddit.}
 
 \item{accesstoken}{The accesstoken required to access the endpoint. Scope
 must be \code{"read"}.}
+
+\item{output}{What the function should return. Choose \code{json} for an 
+unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+and \code{all} for a list containg the json object, a dataframe, and the 
+before and after anchors (if those exist for the endpoint).}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
@@ -40,16 +46,18 @@ Get basic information for a specified subreddit.
 \examples{
 \dontrun{
 read_token <- get_token(scope = "read",
-                        useragent,
-                        username,
-                        password,
-                        client_id,
-                        client_secret)
+                        useragent = my_useragent,
+                        username = my_username,
+                        password = my_password,
+                        client_id = my_client_id,
+                        client_secret = my_client_secret)
 
+#Get sidebar for subreddit "soccer"
 sub_info <- get_subreddit_info(subreddit = "soccer",
                                type = "info",
                                accesstoken = read_token)
 
+#Get moderators for subreddit "soccer"
 moderators <- get_subreddit_info(subreddit = "soccer",
                                 type = "moderators",
                                 accesstoken = read_token)

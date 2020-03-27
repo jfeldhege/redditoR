@@ -4,7 +4,14 @@
 \alias{get_wiki}
 \title{Get wiki pages for a specified subreddit.}
 \usage{
-get_wiki(subreddit, page = "all", accesstoken, verbose = FALSE, retry = FALSE)
+get_wiki(
+  subreddit,
+  page = "all",
+  accesstoken,
+  output = c("df", "json", "all"),
+  verbose = FALSE,
+  retry = FALSE
+)
 }
 \arguments{
 \item{subreddit}{Name of the subreddit for which wiki pages are requested.}
@@ -14,6 +21,11 @@ all wiki pages for the subreddit are returned.}
 
 \item{accesstoken}{The access token required to access the endpoint. Scope of
 the access token must be \code{"wikiread"}.}
+
+\item{output}{What the function should return. Choose \code{json} for an 
+unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+and \code{all} for a list containg the json object, a dataframe, and the 
+before and after anchors (if those exist for the endpoint).}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
@@ -33,11 +45,11 @@ Get wiki pages for a specified subreddit.
 \examples{
 \dontrun{
 wiki_token <- get_token(scope = "wikiread",
-                        useragent = useragent,
-                        username = username,
-                        password = password,
-                        client_id = client_id,
-                        client_secret = client_secret)
+                        useragent = my_useragent,
+                        username = my_username,
+                        password = my_password,
+                        client_id = my_client_id,
+                        client_secret = my_client_secret)
 
 #All wiki pages of a subreddit
 soccer_wiki <- get_wiki(subreddit = "soccer",

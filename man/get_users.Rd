@@ -10,6 +10,7 @@ get_users(
   limit = 100,
   after = NULL,
   before = NULL,
+  output = c("df", "json", "all"),
   verbose = FALSE,
   retry = FALSE
 )
@@ -33,6 +34,11 @@ Items after this item in the listing are returned.}
 \item{before}{The fullname of an item serving as anchor in the
 request. Items before this item in the listing are returned.}
 
+\item{output}{What the function should return. Choose \code{json} for an 
+unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+and \code{all} for a list containg the json object, a dataframe, and the 
+before and after anchors (if those exist for the endpoint).}
+
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
 
@@ -48,6 +54,13 @@ Searches for popular or new users and returns them as a dataframe.
 }
 \examples{
 \dontrun{
+read_token <- get_token(scope = "read",
+                        useragent = my_useragent,
+                        username = my_username,
+                        password = my_password,
+                        client_id = my_client_id,
+                        client_secret = my_client_secret)
+                        
 #Find popular users
 popular_users <- get_users(type = "popular",
                            accesstoken = read_token,

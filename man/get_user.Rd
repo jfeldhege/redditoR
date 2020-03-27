@@ -13,6 +13,7 @@ get_user(
   limit = 100,
   before = NULL,
   after = NULL,
+  output = c("df", "json", "all"),
   verbose = FALSE,
   retry = FALSE
 )
@@ -66,6 +67,11 @@ request. Items before this item in the listing are returned.}
 \item{after}{The fullname of an item serving as anchor in the request.
 Items after this item in the listing are returned.}
 
+\item{output}{What the function should return. Choose \code{json} for an 
+unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+and \code{all} for a list containg the json object, a dataframe, and the 
+before and after anchors (if those exist for the endpoint).}
+
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
 
@@ -83,11 +89,11 @@ requested for a specific timeframe or sort order.
 \examples{
 \dontrun{
 history_token <- get_token(scope = "history",
-                           useragent = useragent,
-                           username = username,
-                           password = password,
-                           client_id = client_id,
-                           client_secret = client_secret)
+                           useragent = my_useragent,
+                           username = my_username,
+                           password = my_password,
+                           client_id = my_client_id,
+                           client_secret = my_client_secret)
 
 # overview returns posts and comments
 overview <- get_user(user = "_KeanuReeves",

@@ -41,28 +41,28 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                        password = NULL,
                        client_id = NULL,
                        client_secret = NULL) {
-
+  
   assertthat::assert_that(assertthat::is.string(scope),
                           assertthat::not_empty(scope),
                           nchar(scope) > 0,
                           scope %in% c("identity", "read", "history", "wikiread"),
                           msg = "Invalid scope")
-
+  
   assertthat::assert_that(assertthat::is.string(useragent),
                           assertthat::not_empty(useragent),
                           nchar(useragent) > 0,
                           msg = "Please supply a useragent")
-
+  
   if(is.null(username)) {username <- Sys.getenv("REDDIT_API_USERNAME")}
   if(is.null(password)){password <- Sys.getenv("REDDIT_API_PASSWORD")}
   if(is.null(client_id)){client_id <- Sys.getenv("REDDIT_API_CLIENT_ID")}
   if(is.null(client_secret)){client_secret <- Sys.getenv("REDDIT_API_CLIENT_SECRET")}
-
+  
   check_credentials(username)
   check_credentials(password)
   check_credentials(client_id)
   check_credentials(client_secret)
-
+  
   token <- httr::POST(url = "https://www.reddit.com/api/v1/access_token",
                       body = list(
                         grant_type = "password",
@@ -73,17 +73,17 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
                       httr::authenticate(client_id, client_secret),
                       httr::user_agent(useragent)
   )
-
+  
   httr::stop_for_status(token)
-
+  
   acc_token <- httr::content(token)
-
+  
   access_time <- Sys.time()
-
+  
   acc_token <- c(acc_token,
                  access_time = access_time,
                  useragent = useragent)
-
+  
   return (acc_token)
 }
 
@@ -122,6 +122,10 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #' Posts before this post in the listing are returned.
 #' @param after The fullname of a post serving as anchor in the request.
 #' Posts after this post in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -159,27 +163,30 @@ get_posts <- function(subreddit,
                       time = NULL,
                       after = NULL,
                       before = NULL,
+                      output = c("df","json", "all"),
                       verbose = FALSE,
                       retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args(default_arg = "subreddit")
-
+  
+  output <- match.arg(output)
+  
   if(!is.null(time)){
     if(!time %in% c("hour", "day", "week", "month", "year", "all"))
       stop("Time has to be one of these: hour, day, week, month, year, all")}
-
+  
   link <- build_link(path_elements = paste0("r/", subreddit, "/", sort),
                      query_elements = paste0("limit=", limit, "&t=", time),
-                     before = before, after = after)
-
+                     before, after)
+  
   if(verbose == TRUE) print(paste("Getting posts from:",link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  posts <- parse_response(resp,after_before = TRUE, verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  posts <- parse_request(req, verbose, output, after_before = TRUE)
+  
   return(posts)
 }
 
@@ -217,6 +224,10 @@ get_posts <- function(subreddit,
 #' Posts before this post in the listing are returned.
 #' @param after The fullname of a post serving as anchor in the request.
 #' Posts after this post in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -249,27 +260,31 @@ get_submissions <- function (user,
                              limit = 100,
                              before = NULL,
                              after = NULL,
+                             output = c("df","json", "all"),
                              verbose = FALSE,
                              retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "history")
-
+  
   check_args(default_arg = "user")
-
+  
+  output <- match.arg(output)
+  
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
-
+  
   link <- build_link(path_elements = paste0("user/", user, "/submitted"),
-                     query_elements = paste0("limit=", limit,"&sort=", sort,
+                     query_elements = paste0("limit=", limit,
+                                             "&sort=", sort,
                                              "&t=", time),
                      before = before, after = after)
-
+  
   if(verbose == TRUE) print(paste("Getting submissions from:", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  submissions <- parse_response(resp, after_before = TRUE, verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  submissions <- parse_request(req,  verbose, output, after_before = TRUE)
+  
   return(submissions)
 }
 
@@ -286,6 +301,10 @@ get_submissions <- function (user,
 #' Comments before this comment in the listing are returned.
 #' @param after The fullname of a comment serving as anchor in the request.
 #' Comments after this comment in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -313,23 +332,26 @@ get_comments <- function (subreddit,
                           limit=100,
                           before=NULL,
                           after=NULL,
+                          output = c("df","json", "all"),
                           verbose = FALSE,
                           retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args(default_arg = "subreddit")
-
+  
+  output <- match.arg(output)
+  
   link <- build_link(path_elements = paste0("r/", subreddit,"/comments"),
                      query_elements = paste0("limit=", limit),
                      before = before, after = after)
-
+  
   if(verbose == TRUE) print(paste("Getting comments from:",link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  comments <- parse_response(resp,after_before = TRUE, verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  comments <- parse_request(req, verbose, output, after_before = TRUE)
+  
   return(comments)
 }
 
@@ -368,6 +390,10 @@ get_comments <- function (subreddit,
 #' Comments before this comment in the listing are returned.
 #' @param after The fullname of a comment serving as anchor in the request.
 #' Comments after this comment in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -399,27 +425,31 @@ get_user_comments <- function (user,
                                limit = 100,
                                after=NULL,
                                before=NULL,
+                               output = c("df","json", "all"),
                                verbose = FALSE,
                                retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "history")
-
+  
   check_args(default_arg = "user")
-
+  
+  output <- match.arg(output)
+  
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
-
+  
   link <- build_link(path_elements = paste0("user/", user,"/comments"),
-                     query_elements = paste0("limit=",limit,"&sort=", sort,
+                     query_elements = paste0("limit=",limit,
+                                             "&sort=", sort,
                                              "&t=", time),
-                     before = before, after = after)
-
+                     before, after)
+  
   if(verbose == TRUE) print(paste("Getting comments from:", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  user_comments <- parse_response(resp,after_before = TRUE, verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  user_comments <- parse_request(req, verbose, output, after_before = TRUE)
+  
   return(user_comments)
 }
 
@@ -469,6 +499,10 @@ get_user_comments <- function (user,
 #' request. Items before this item in the listing are returned.
 #' @param after The fullname of an item serving as anchor in the request.
 #' Items after this item in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -525,30 +559,34 @@ get_user <- function (user,
                       limit = 100,
                       before=NULL,
                       after=NULL,
+                      output = c("df","json", "all"),
                       verbose = FALSE,
                       retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "history")
-
+  
   check_args(default_arg = "user")
-
+  
+  output <- match.arg(output)
+  
   if(!type %in% c("overview", "comments", "submitted", "gilded"))
     stop("type has to be one of these: overview, comments, submitted, gilded")
-
+  
   if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
     stop("Time has to be one of these: hour, day, week, month, year, all")
-
+  
   link <- build_link(path_elements = paste0("user/", user,"/", type),
-                     query_elements = paste0("limit=", limit, "&sort=", sort,
+                     query_elements = paste0("limit=", limit, 
+                                             "&sort=", sort,
                                              "&t=", time),
-                     before = before, after = after)
-
+                     before, after)
+  
   if(verbose == TRUE) print(paste("Getting user data from:", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  user <- parse_response(resp,after_before = TRUE, verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  user <- parse_request(req, verbose, output, after_before = TRUE)
+  
   return(user)
 }
 
@@ -558,6 +596,10 @@ get_user <- function (user,
 #' @param user Username of the Reddit user that is requested.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"read"}.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -581,23 +623,27 @@ get_user <- function (user,
 
 get_user_info <- function (user,
                            accesstoken,
+                           output = c("df","json", "all"),
                            verbose = FALSE,
                            retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args(default_arg = "user")
-
+  
+  output <- match.arg(output)
+  
   link <- build_link(path_elements = paste0("user/", user, "/about"))
-
+  
   if(verbose == TRUE) print(paste("Getting user info from: ", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  user_info <- parse_response(resp,
-                              after_before = FALSE,
-                              verbose = verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  user_info <- parse_request(req,
+                             verbose, 
+                             output, 
+                             after_before = FALSE)
+  
   return(user_info)
 }
 
@@ -614,6 +660,10 @@ get_user_info <- function (user,
 #' must be \code{"read"}.
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
@@ -645,30 +695,34 @@ get_user_info <- function (user,
 get_subreddit_info <- function (subreddit,
                                 type = c("info", "moderators", "rules"),
                                 accesstoken,
+                                output = c("df","json", "all"),
                                 verbose = FALSE,
                                 retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args(default_arg = "subreddit")
-
+  
+  output <- match.arg(output)
+  
   if(type == "info") {
-
+    
     link <- build_link(path_elements = paste0("r/", subreddit, "/about"))
-
+    
   } else if(type == "moderators"|type == "rules"){
-
+    
     link <- build_link(path_elements = paste0("r/", subreddit, "/about/", type))
-
+    
   } else stop("Result has to be 'info', 'moderators' or 'rules'.")
-
+  
   if(verbose == TRUE) print(paste("Getting subreddit info from:", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  sub_info <- parse_response(resp,
-                             after_before = FALSE,
-                             verbose = verbose)
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  sub_info <- parse_request(req,
+                            verbose,
+                            output,
+                            after_before = FALSE)
   return(sub_info)
 }
 
@@ -680,6 +734,10 @@ get_subreddit_info <- function (subreddit,
 #' all wiki pages for the subreddit are returned.
 #' @param accesstoken The access token required to access the endpoint. Scope of
 #' the access token must be \code{"wikiread"}.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -715,13 +773,16 @@ get_subreddit_info <- function (subreddit,
 get_wiki <- function (subreddit,
                       page = "all",
                       accesstoken,
+                      output = c("df","json", "all"),
                       verbose = FALSE,
                       retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "wikiread")
-
+  
   check_args(default_arg = "subreddit")
-
+  
+  output <- match.arg(output)
+  
   if(page == "all"){
     link <- build_link(path_elements = paste0("r/", subreddit, "/wiki/pages"),
                        query_elements = NULL, before = NULL, after = NULL)
@@ -729,15 +790,16 @@ get_wiki <- function (subreddit,
     link <- build_link(path_elements = paste0("r/", subreddit, "/wiki/", page),
                        query_elements = NULL, before = NULL, after = NULL)
   }
-
+  
   if(verbose == TRUE) print(paste("Getting wiki from", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  wiki <- parse_response(resp,
-                         after_before = FALSE,
-                         verbose = verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  wiki <- parse_request(req,
+                        verbose,
+                        output, 
+                        after_before = FALSE)
+  
   return(wiki)
 }
 
@@ -748,6 +810,10 @@ get_wiki <- function (subreddit,
 #' @param user The username of the user
 #' @param accesstoken The access token required to access the endpoint. Scope of
 #' the acces token must be \code{"read"}.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -771,24 +837,28 @@ get_wiki <- function (subreddit,
 
 get_trophies <- function (user,
                           accesstoken,
+                          output = c("df","json", "all"),
                           verbose = FALSE,
                           retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args(default_arg = "user")
-
+  
+  output <- match.arg(output)
+  
   link <- build_link(path_elements = paste0("api/v1/user/", user,
                                             "/trophies"), query_elements = NULL, before = NULL, after = NULL)
-
+  
   if(verbose == TRUE) print(paste("Getting trophies from:", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  trophies <- parse_response(resp,
-                             after_before = FALSE,
-                             verbose = verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  trophies <- parse_request(req,
+                            verbose,
+                            output, 
+                            after_before = FALSE)
+  
   return(trophies)
 }
 
@@ -819,6 +889,10 @@ get_trophies <- function (user,
 #' request. Items before this item in the listing are returned.
 #' @param after The fullname of an item serving as anchor in the request.
 #' Items after this item in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -856,32 +930,36 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
                             limit = 100,
                             after = NULL,
                             before = NULL,
+                            output = c("df","json", "all"),
                             verbose = FALSE,
                             retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args(default_arg = NULL)
-
+  
+  output <- match.arg(output)
+  
   if(!type %in% c("popular", "new", "default", "search"))
     stop("type has to be one of these: popular, new, default", "search")
-
+  
   if(type == "search") assertthat::assert_that(!is.null(query),
                                                msg = "No query specified for type search")
-
+  
   link <- build_link(path_elements = paste0("subreddits/", type),
                      query_elements = paste0("limit=",limit,  "&q=", query,
                                              "&sort=", sort),
                      before = before, after = after)
-
+  
   if(verbose == TRUE) print(paste("Getting subreddits from:", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  subreddits <- parse_response(resp,
-                               after_before = TRUE,
-                               verbose = verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  subreddits <- parse_request(req,
+                              verbose,
+                              output,
+                              after_before = TRUE)
+  
   return(subreddits)
 }
 
@@ -905,6 +983,10 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 #' request. Items before this item in the listing are returned.
 #' @param after The fullname of an item serving as anchor in the request.
 #' Items after this item in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -936,40 +1018,44 @@ get_users <- function(type = c("popular", "new"),
                       limit = 100,
                       after = NULL,
                       before = NULL,
+                      output = c("df","json", "all"),
                       verbose = FALSE,
                       retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args()
-
+  
+  output <- match.arg(output)
+  
   if(!type %in% c("popular", "new"))
     stop("type has to be one of these: popular, new")
-
+  
   link <- build_link(path_elements = paste0("users/", type),
                      query_elements = paste0("limit=",limit),
-                     before = before, after = after)
-
+                     before, after)
+  
   if(verbose == TRUE) print(paste("Getting users from: ", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  users <- parse_response(resp,
-                          after_before = TRUE,
-                          verbose = verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  users <- parse_request(req,
+                         verbose,
+                         output,
+                         after_before = TRUE)
+  
   return(users)
 }
 
 
 
-#' Search for posts
+#' Search for items based on a query
 #'
 #' Searches can be confined to one subreddit or conducted in all of reddit.
 #'
 #' @param query The search query. Maximum length of the query is 512 characters.
 #' @param subreddit The name of the subreddit in which the search should be
-#' conducted. If left empty, the search will be conducted in all subreddits.
+#' conducted. If it is NULL, the search will be conducted in all subreddits.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"read"}.
 #' @param sort The order in which the search results should be ordered
@@ -994,10 +1080,17 @@ get_users <- function(type = c("popular", "new"),
 #'   \item \code{year}
 #'   \item \code{all time}
 #' }
+#' @param type The type of item to return. Must be \code{"link"} for posts, 
+#' \code{"user"} for "users or \code{"sr"} for subreddits. If it is NULL, it 
+#' will return posts.
 #' @param before The fullname of a search result serving as anchor in the
 #' request. Search results before this post in the listing are returned.
 #' @param after The fullname of a search result serving as anchor in the
 #' request. Search results after this post in the listing are returned.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
 #' @param verbose A logical flag whether information about the data extraction
 #' should be printed to the console.
 #' @param retry A logical flag whether a failed api request should be retried.
@@ -1041,241 +1134,38 @@ search_reddit <- function(query,
                           sort ="new",
                           limit=100,
                           time = NULL,
+                          type = c("link", "user", "sr"),
+                          after=NULL,
+                          before=NULL,
+                          output = c("df","json", "all"),
                           verbose = FALSE,
                           retry = FALSE) {
-
+  
   check_token(accesstoken, scope = "read")
-
+  
   check_args(default_arg = "query")
-
+  
+  output <- match.arg(output)
+  
   if(!is.null(subreddit)){search_path <- paste0("r/", subreddit, "/search")}
   else{search_path <- paste0("search")}
-
+  
   link <- build_link(path_elements = search_path,
                      query_elements = paste0("q=",query, "&sort=", sort,
                                              "&limit=", limit, "&t=", time,
+                                             "&type=", type,
                                              "&restrict_sr=on"),
-                     before = NULL, after = NULL)
-
+                     before, after)
+  
   if(verbose == TRUE) print(paste("Getting search results from: ", link))
-
-  resp <- make_request(accesstoken, link, verbose, retry)
-
-  search_results <- parse_response(resp,
-                                   after_before = TRUE,
-                                   verbose = verbose)
-
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  search_results <- parse_request(req,
+                                  verbose,
+                                  output,
+                                  after_before = TRUE)
+  
   return(search_results)
-}
-
-
-check_token <- function(x, scope){
-
-  if(is.null(x)){
-    stop("No token was specified")
-  }else {
-    if(is.null(x$useragent)) stop("No user agent was specified")
-
-    if(Sys.time() - x$access_time > 3600) stop("Token is expired")
-
-    if(x$scope != scope) stop(paste("This function requires", scope, "as scope of the token"))
-  }
-}
-
-
-check_args <- function(default_arg = NULL){
-
-  get_args <- function () {
-    as.list(sys.frame(-2))
-  }
-
-  check_strings <- function(x, y){
-
-    string_args <- c("user", "subreddit", "time", "page", "sort", "after",
-                     "before")
-
-    if(y %in% string_args & !is.null(x)) {
-      assertthat::assert_that(assertthat::is.string(x),
-                              assertthat::not_empty(x),
-                              msg = paste(y, "is not a character vector"))
-    }
-  }
-
-  args <- get_args()
-
-  if(!is.null(default_arg)){
-    if(default_arg == "user"){
-      assertthat::assert_that("user" %in% names(args),
-                              assertthat::not_empty(args$user),
-                              assertthat::is.string(args$user),
-                              nchar(args$user)> 0,
-                              msg = "A non-empty character vector has to be supplied for the parameter 'user'")
-    } else if(default_arg == "subreddit"){
-      assertthat::assert_that("subreddit" %in% names(args),
-                              assertthat::not_empty(args$subreddit),
-                              assertthat::is.string(args$subreddit),
-                              nchar(args$subreddit)> 0,
-                              msg = "A non-empty character vector has to be supplied for the parameter 'subreddit'")
-    } else if(default_arg == "query"){
-      assertthat::assert_that("query" %in% names(args),
-                              assertthat::not_empty(args$query),
-                              assertthat::is.string(args$query),
-                              nchar(args$query)> 0,
-                              msg = "A non-empty string has to be supplied for the parameter 'query'")
-    }
-  }
-
-  mapply(check_strings, args, names(args))
-
-  if("query" %in% names(args) & !is.null(args$query)){
-    assertthat::assert_that(assertthat::is.string(args$query),
-                            assertthat::not_empty(args$query),
-                            nchar(args$query) > 0,
-                            nchar(args$query) < 513)}
-
-  if("limit" %in% names(args) & !is.null(args$limit)){
-    assertthat::assert_that(assertthat::is.count(args$limit),
-                            args$limit < 101,
-                            args$limit > 0,
-                            msg = "'limit' has to be a number between 0 and 100")}
-
-  if("verbose" %in% names(args) & !is.null(args$verbose)){
-    assertthat::assert_that(assertthat::is.flag(args$verbose),
-                            msg = "'verbose' has to be a boolean")}
-}
-
-build_link <-  function(path_elements,
-                        query_elements = NULL,
-                        before = NULL,
-                        after = NULL){
-
-  base_url <- ("https://oauth.reddit.com/")
-
-  path <- paste0(path_elements, ".json")
-
-  if(is.null(before) & !is.null(after)){
-
-    query <- paste0(query_elements, "&after=", after)
-
-  } else if (!is.null(before) & is.null(after)) {
-
-    query <- paste0(query_elements, "&before=", before)
-
-  } else if(!is.null(before) & !is.null(after)){
-
-    stop ('Only one of "before" or "after" should be specified')
-
-  } else if(is.null(before) & is.null(after)){
-
-    query <- query_elements
-  }
-
-  link <- httr::modify_url(base_url, path = path, query = query)
-
-  return(link)
-}
-
-make_request <- function(accesstoken,
-                         link,
-                         verbose,
-                         retry){
-  auth <- paste("bearer", accesstoken$access_token)
-
-  if(retry){
-    request <- httr::RETRY("GET", url = link,
-                           httr::add_headers(Authorization = auth),
-                           httr::user_agent(accesstoken$useragent),
-                           times = 3)
-  } else {
-    request <- httr::GET(link,
-                         httr::add_headers(Authorization = auth),
-                         httr::user_agent(accesstoken$useragent))
-  }
-
-
-  httr::stop_for_status(request)
-
-  if (httr::http_type(request) != "application/json") {
-    stop("reddit API did not return a json object", call. = FALSE)
-  }
-
-  if(verbose == TRUE) print(httr::http_status(request)$message)
-
-  return(request)
-}
-
-parse_response <- function(response,
-                           after_before = FALSE,
-                           verbose) {
-
-  response_json <- jsonlite::fromJSON(httr::content(response, as="text"), flatten = TRUE)
-
-  if("data" %in% names(response_json)){
-    data <- response_json$data
-  } else {
-    is_df <- sapply(response_json, is.data.frame)
-
-    if(any(is_df)){
-      data <- response_json[which(is_df)]
-    }
-  }
-
-  if(length(data)>0){
-
-    if(!is.data.frame(data)){
-
-      is_df <- sapply(data, is.data.frame)
-
-      if(any(is_df)){
-        data <- data[[which(is_df)]]
-      } else {
-        replace_null <- function(x) {
-          lapply(x, function(x) {
-            if (is.list(x)){
-              replace_null(x)
-            } else{
-              if(is.null(x)) NA else(x)
-            }
-          })
-        }
-
-        data <- replace_null(data)
-
-        replace_empty_list <- function(x){
-          if (is.list(x) & length(x) == 0) NA else (x)
-        }
-
-        data <- replace_empty_list(data)
-
-        data <- data.frame(t(unlist(data)), stringsAsFactors = FALSE)
-      }
-    }
-
-    names(data) <- sub("data.", "", names(data))
-
-    if(verbose == TRUE) print(paste(nrow(data),"item(s) retrieved from reddit."))
-
-    if(after_before == TRUE){
-      after <<- response_json$data$after
-
-      before <<- data[order(data$created, decreasing = T),"name"][1]
-    }
-
-    return(data)
-
-  } else{
-    if(verbose == TRUE) print("No items retrieved from reddit.")
-
-    df_after <<- NA
-    df_before <<- NA
-  }
-}
-
-check_credentials <- function(cred) {
-  assertthat::assert_that(assertthat::is.string(cred),
-                          assertthat::not_empty(cred),
-                          nchar(cred) > 0,
-                          msg = paste(deparse(substitute(cred)),
-                                      "needs to be passed as a character vector"))
 }
 

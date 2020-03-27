@@ -2,7 +2,7 @@
 % Please edit documentation in R/reddit_functions.R
 \name{search_reddit}
 \alias{search_reddit}
-\title{Search for posts}
+\title{Search for items based on a query}
 \usage{
 search_reddit(
   query,
@@ -11,6 +11,10 @@ search_reddit(
   sort = "new",
   limit = 100,
   time = NULL,
+  type = c("link", "user", "sr"),
+  after = NULL,
+  before = NULL,
+  output = c("df", "json", "all"),
   verbose = FALSE,
   retry = FALSE
 )
@@ -22,7 +26,7 @@ search_reddit(
 must be \code{"read"}.}
 
 \item{subreddit}{The name of the subreddit in which the search should be
-conducted. If left empty, the search will be conducted in all subreddits.}
+conducted. If it is NULL, the search will be conducted in all subreddits.}
 
 \item{sort}{The order in which the search results should be ordered
 when accessing them. Possible values are:
@@ -49,18 +53,27 @@ values are:
   \item \code{all time}
 }}
 
+\item{type}{The type of item to return. Must be \code{"link"} for posts, 
+\code{"user"} for "users or \code{"sr"} for subreddits. If it is NULL, it 
+will return posts.}
+
+\item{after}{The fullname of a search result serving as anchor in the
+request. Search results after this post in the listing are returned.}
+
+\item{before}{The fullname of a search result serving as anchor in the
+request. Search results before this post in the listing are returned.}
+
+\item{output}{What the function should return. Choose \code{json} for an 
+unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+and \code{all} for a list containg the json object, a dataframe, and the 
+before and after anchors (if those exist for the endpoint).}
+
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
 
 \item{retry}{A logical flag whether a failed api request should be retried.
 Requests will be tried up to three times with varying time intervals between
 requests.}
-
-\item{before}{The fullname of a search result serving as anchor in the
-request. Search results before this post in the listing are returned.}
-
-\item{after}{The fullname of a search result serving as anchor in the
-request. Search results after this post in the listing are returned.}
 }
 \value{
 A dataframe with posts matching the search query.
@@ -75,7 +88,14 @@ this link: \url{https://www.reddit.com/wiki/search}
 }
 \examples{
 \dontrun{
-#Search un a subreddit
+read_token <- get_token(scope = "read",
+                        useragent = my_useragent,
+                        username = my_username,
+                        password = my_password,
+                        client_id = my_client_id,
+                        client_secret = my_client_secret)
+                        
+#Search for posts in a single subreddit
 search_results_movies <- search_reddit(subreddit = "movies",
                                 accesstoken = read_token,
                                 query = "Keanu+Reeves",
@@ -83,7 +103,7 @@ search_results_movies <- search_reddit(subreddit = "movies",
                                 limit = 10,
                                 time = "year")
 
-# Search all of reddit
+# Search for posts in all of reddit
 search_results_reddit <- search_reddit(subreddit = NULL,
                                       accesstoken = read_token,
                                       query = "Keanu+Reeves",

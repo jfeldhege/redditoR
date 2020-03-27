@@ -12,6 +12,7 @@ get_submissions(
   limit = 100,
   before = NULL,
   after = NULL,
+  output = c("df", "json", "all"),
   verbose = FALSE,
   retry = FALSE
 )
@@ -51,6 +52,11 @@ Posts before this post in the listing are returned.}
 
 \item{after}{The fullname of a post serving as anchor in the request.
 Posts after this post in the listing are returned.}
+
+\item{output}{What the function should return. Choose \code{json} for an 
+unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+and \code{all} for a list containg the json object, a dataframe, and the 
+before and after anchors (if those exist for the endpoint).}
 
 \item{verbose}{A logical flag whether information about the data extraction
 should be printed to the console.}
