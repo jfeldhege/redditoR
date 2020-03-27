@@ -1,7 +1,7 @@
 Package: redditoR
 Type: Package
 Title: Access the Reddit API
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Johannes", "Feldhege", email = "feldhegege@psyres.de", 
     role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4665-5235")))
