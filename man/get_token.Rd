@@ -38,6 +38,9 @@ set with \code{Sys.setenv(REDDIT_API_SECRET = "")}}
 \value{
 A list containing the access token, the time until it expires, the
 scope, the time it was generated and the useragent
+
+A list containing the access token, its scope, the acces time and
+the useragent.
 }
 \description{
 Generate an access token for the Reddit API
@@ -50,6 +53,8 @@ Apps can be defined in the settings at this page
 \url{https://www.reddit.com/prefs/apps/}. Client ID and Client Secret must be
 taken from this page.
 More info about accessing the API at \url{https://www.reddit.com/dev/api/}
+
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{

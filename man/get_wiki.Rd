@@ -35,12 +35,17 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A list containg the text of the page and all revisions.
-If  \code{"page"} is \code{"all"}, a character vector containg the names of
-all wiki pages.
+The text of the wiki page and all revisions as a dataframe, json 
+object or a list containing both.
+If  \code{"page"} is \code{"all"}, the names of all wiki pages as a dataframe, 
+json object or a list containing both.
 }
 \description{
 Get wiki pages for a specified subreddit.
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/} and 
+\url{https://www.reddit.com/wiki/wiki}
 }
 \examples{
 \dontrun{

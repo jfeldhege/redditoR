@@ -31,10 +31,15 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe with all trophies a specified user has received.
+All trophies a specified user has received as a dataframe, json 
+object or a list containing both.
 }
 \description{
 Get trophies for a specified user
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/} and 
+\url{https://www.reddit.com/wiki/trophies}
 }
 \examples{
 \dontrun{

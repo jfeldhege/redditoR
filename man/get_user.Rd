@@ -80,11 +80,15 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe of posts, comments or both for the specified user.
+Posts, comments or both for the specified user as a dataframe, json 
+object or a list containing both.
 }
 \description{
 This function returns posts and/or comments made by one user. They can be
 requested for a specific timeframe or sort order.
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{

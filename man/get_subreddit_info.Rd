@@ -37,11 +37,15 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe with basic information about a subreddit from the
-sidebar or a dataframe with the moderators or the rules of the subreddif.
+Basic information about a subreddit from the
+sidebar or the moderators or the rules of the subreddit as a dataframe, json 
+object or a list containing both.
 }
 \description{
 Get basic information for a specified subreddit.
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{

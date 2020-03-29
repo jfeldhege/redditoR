@@ -47,10 +47,14 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe of users.
+New or popular users as a dataframe, json object or a list 
+containing both.
 }
 \description{
 Searches for popular or new users and returns them as a dataframe.
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{

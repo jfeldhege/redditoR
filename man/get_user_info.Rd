@@ -31,10 +31,14 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe with information about a specified user.
+Information about a specified user as a dataframe, json object or a 
+list containing both.
 }
 \description{
 Get basic information about the account of a specified user
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{

@@ -58,11 +58,15 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe of subreddits.
+New or popular subreddits as a dataframe, json object or a list 
+containing both.
 }
 \description{
 Subreddits can be sorted by creation date or popularity. Also
 allows searching for subreddits with search queries.
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{

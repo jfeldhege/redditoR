@@ -76,7 +76,8 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe with posts matching the search query.
+Posts matching the search query as a dataframe, json object or a list
+containing both.
 }
 \description{
 Searches can be confined to one subreddit or conducted in all of reddit.

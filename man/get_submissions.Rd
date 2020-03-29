@@ -66,7 +66,8 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe of posts for a specified user.
+Posts for a specified user as a dataframe, json object or a list 
+containing both.
 }
 \description{
 Submissions are posts made by one user. Submissions can be requested for a

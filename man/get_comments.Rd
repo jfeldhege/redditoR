@@ -43,10 +43,14 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe with new comments from a specified subreddit.
+New comments from a specified subreddit as a dataframe, json 
+object or a list containing both.
 }
 \description{
 Get comments from a specified subreddit
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{

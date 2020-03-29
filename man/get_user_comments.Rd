@@ -67,11 +67,15 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe of comments for the specified user.
+Comments for the specified user as a dataframe, json  object or a 
+list containing both.
 }
 \description{
 This returns comments made by one user. Comments can be requested for a
 specific timeframe or sort order.
+}
+\details{
+More info at \url{https://www.reddit.com/dev/api/}
 }
 \examples{
 \dontrun{
@@ -88,4 +92,7 @@ keanu_comments <- get_user_comments(user = "_KeanuReeves",
                                     sort = "top", time = "all",
                                     limit = 10)
 }
+}
+\seealso{
+\code{\link{get_user}}
 }

@@ -68,7 +68,8 @@ Requests will be tried up to three times with varying time intervals between
 requests.}
 }
 \value{
-A dataframe containg the requested posts
+The requested posts as a dataframe, json object or a list 
+containing both.
 }
 \description{
 A maximum of 100 posts can be requested from a specified subreddit. The
