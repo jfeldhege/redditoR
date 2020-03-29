@@ -24,6 +24,9 @@
 #' \url{https://www.reddit.com/prefs/apps/}. Client ID and Client Secret must be
 #' taken from this page.
 #' More info about accessing the API at \url{https://www.reddit.com/dev/api/}
+#' @return A list containing the access token, its scope, the acces time and
+#' the useragent.
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
@@ -131,7 +134,8 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe containg the requested posts
+#' @return The requested posts as a dataframe, json object or a list 
+#' containing both.
 #' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
@@ -233,7 +237,8 @@ get_posts <- function(subreddit,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe of posts for a specified user.
+#' @return Posts for a specified user as a dataframe, json object or a list 
+#' containing both.
 #' @export
 #' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @seealso \code{\link{get_user}}
@@ -310,8 +315,10 @@ get_submissions <- function (user,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe with new comments from a specified subreddit.
+#' @return New comments from a specified subreddit as a dataframe, json 
+#' object or a list containing both.
 #' @export
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
@@ -342,7 +349,7 @@ get_comments <- function (subreddit,
   
   output <- match.arg(output)
   
-  link <- build_link(path_elements = paste0("r/", subreddit,"/comments"),
+  link <- build_link(path_elements = paste0("r/", subreddit, "/comments"),
                      query_elements = paste0("limit=", limit),
                      before = before, after = after)
   
@@ -399,8 +406,11 @@ get_comments <- function (subreddit,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe of comments for the specified user.
+#' @return Comments for the specified user as a dataframe, json  object or a 
+#' list containing both.
 #' @export
+#' @seealso \code{\link{get_user}}
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
 #' history_token <- get_token(scope = "history",
@@ -508,7 +518,9 @@ get_user_comments <- function (user,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe of posts, comments or both for the specified user.
+#' @return Posts, comments or both for the specified user as a dataframe, json 
+#' object or a list containing both.
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @seealso \code{\link{get_user_comments}} and \code{\link{get_submissions}}
 #' @export
 #' @examples
@@ -605,8 +617,10 @@ get_user <- function (user,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe with information about a specified user.
+#' @return Information about a specified user as a dataframe, json object or a 
+#' list containing both.
 #' @export
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
@@ -668,10 +682,11 @@ get_user_info <- function (user,
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
 #'
-#' @return A dataframe with basic information about a subreddit from the
-#' sidebar or a dataframe with the moderators or the rules of the subreddif.
+#' @return Basic information about a subreddit from the
+#' sidebar or the moderators or the rules of the subreddit as a dataframe, json 
+#' object or a list containing both.
 #' @export
-#'
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
@@ -744,12 +759,15 @@ get_subreddit_info <- function (subreddit,
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
 #'
-#' @return A list containg the text of the page and all revisions.
-#' If  \code{"page"} is \code{"all"}, a character vector containg the names of
-#' all wiki pages.
+#' @return The text of the wiki page and all revisions as a dataframe, json 
+#' object or a list containing both.
+#' If  \code{"page"} is \code{"all"}, the names of all wiki pages as a dataframe, 
+#' json object or a list containing both.
 #' @export
 #'
 #' @seealso \code{\link{get_subreddit_info}}
+#' @details More info at \url{https://www.reddit.com/dev/api/} and 
+#' \url{https://www.reddit.com/wiki/wiki}
 #' @examples
 #' \dontrun{
 #' wiki_token <- get_token(scope = "wikiread",
@@ -820,9 +838,12 @@ get_wiki <- function (subreddit,
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
 #'
-#' @return A dataframe with all trophies a specified user has received.
+#' @return All trophies a specified user has received as a dataframe, json 
+#' object or a list containing both.
 #' @export
 #' @seealso \code{\link{get_user_info}}
+#' @details More info at \url{https://www.reddit.com/dev/api/} and 
+#' \url{https://www.reddit.com/wiki/trophies}
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
@@ -848,7 +869,8 @@ get_trophies <- function (user,
   output <- match.arg(output)
   
   link <- build_link(path_elements = paste0("api/v1/user/", user,
-                                            "/trophies"), query_elements = NULL, before = NULL, after = NULL)
+                                            "/trophies"), 
+                     query_elements = NULL, before = NULL, after = NULL)
   
   if(verbose == TRUE) print(paste("Getting trophies from:", link))
   
@@ -898,9 +920,10 @@ get_trophies <- function (user,
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe of subreddits.
+#' @return  New or popular subreddits as a dataframe, json object or a list 
+#' containing both.
 #' @export
-#'
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #'@examples
 #'\dontrun{
 #' read_token <- get_token(scope = "read",
@@ -992,8 +1015,10 @@ get_subreddits <- function (type = c("popular", "new", "default", "search"),
 #' @param retry A logical flag whether a failed api request should be retried.
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
-#' @return A dataframe of users.
+#' @return New or popular users as a dataframe, json object or a list 
+#' containing both.
 #' @export
+#' @details More info at \url{https://www.reddit.com/dev/api/}
 #' @examples
 #' \dontrun{
 #' read_token <- get_token(scope = "read",
@@ -1097,7 +1122,8 @@ get_users <- function(type = c("popular", "new"),
 #' Requests will be tried up to three times with varying time intervals between
 #' requests.
 #'
-#' @return A dataframe with posts matching the search query.
+#' @return Posts matching the search query as a dataframe, json object or a list
+#' containing both.
 #'
 #' @details A '+' has to be put between multiple search terms in the query.
 #' Information on how to build advanced search queries can be found at
@@ -1169,3 +1195,82 @@ search_reddit <- function(query,
   return(search_results)
 }
 
+#' Get a comment or post based on its unique id
+#'
+#' @param subreddit The subreddit of the thing
+#' @param id The unique id of the requested thing. Reddit IDs are in base 36.
+#' @param item_type What type of thing the id is. Must be \code{comment} or 
+#' \code{post}.
+#' @param accesstoken The accesstoken required to access the endpoint. Scope
+#' must be \code{"read"}.
+#' @param output What the function should return. Choose \code{json} for an 
+#' unparsed json object, \code{df} for a parsed object in form of a dataframe, 
+#' and \code{all} for a list containg the json object, a dataframe, and the 
+#' before and after anchors (if those exist for the endpoint).
+#' @param verbose A logical flag whether information about the data extraction
+#' should be printed to the console.
+#' @param retry A logical flag whether a failed api request should be retried.
+#' Requests will be tried up to three times with varying time intervals between
+#' requests.
+#'
+#' @return The requested thing as a dataframe, json object or a list containing 
+#' both.
+#' @export
+#' @details More info at \url{https://www.reddit.com/dev/api/}
+#' @examples
+#' \dontrun{
+#' read_token <- get_token(scope = "read",
+#'                         useragent = my_useragent,
+#'                         username = my_username,
+#'                         password = my_password,
+#'                         client_id = my_client_id,
+#'                         client_secret = my_client_secret)
+#'                         
+#' 
+#' comm <- get_comments(subreddit = "askreddit",
+#'                       accesstoken = read_token,
+#'                       output = "df",
+#'                       limit = 1)
+#'
+#' #Look up the post this comment was made to
+#' parent_post <- get_thing(subreddit = "askreddit",
+#'                          id = comm$parent_id,
+#'                          item_type = "post",
+#'                          accesstoken = read_token)
+#' }
+
+get_thing <- function (subreddit,
+                      id,
+                      item_type = c("comment", "post"),
+                      accesstoken = NULL,
+                      output = c("df","json", "all"),
+                      verbose = FALSE,
+                      retry = FALSE) {
+  
+  
+  check_token(accesstoken, scope = "read")
+  
+  check_args(default_arg = "id")
+  
+  output <- match.arg(output)
+  
+  item_type <- match.arg(item_type)
+  
+  if(grepl("^t[1-9]{1}_", id)){
+    fullname <- id
+  }else{
+    fullname <- ifelse(item_type == "comment", paste0("t1_", id),
+                       paste0("t3_", id)) 
+  }
+  
+  link <- build_link(path_elements = paste0("r/", subreddit, "/api/info"),
+                     query_elements = paste0("id=", fullname))
+  
+  if(verbose == TRUE) print(paste("Getting items from:",link))
+  
+  req <- get_reddit(accesstoken, link, verbose, retry)
+  
+  item <- parse_request(req, verbose, output, after_before = FALSE)
+  
+  return(item)
+}

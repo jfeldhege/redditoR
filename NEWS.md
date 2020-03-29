@@ -7,6 +7,7 @@ containing both
 
 * Added documentation for utility functions
 
+* Added function get_thing() to request a single post or comment
 
  # redditoR 0.1.0 (Release Date: 2020-03-06)
  
