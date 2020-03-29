@@ -216,11 +216,19 @@ parse_request <- function(request,
   
   response_json <- httr::content(request, as="text")
   
+  response_data <- jsonlite::fromJSON(response_json, 
+                                      flatten = TRUE)
+  
+  if("dist" %in% names(response_data$data)) {
+    if(response_data$data$dist == 0) {
+      stop("reddit API returned an empty object. Please check the arguments of
+    your request.")
+    }
+  }
+  
   if(output == "json") {
     out <- response_json
   } else {
-    response_data <- jsonlite::fromJSON(httr::content(request, as="text"), 
-                                        flatten = TRUE)
     
     if("data" %in% names(response_data)){
       data <- response_data$data
@@ -273,6 +281,7 @@ parse_request <- function(request,
     
     if(output == "all"){
       if(after_before == TRUE){
+        
         after <- response_data$data$after
         
         before <- data[order(data$created, decreasing = T),"name"][1]
@@ -282,7 +291,7 @@ parse_request <- function(request,
       } else{
         out <- list(json = response_json, data.frame = data)
       }
-
+      
     } else if(output == "df"){
       out <- data
     }
