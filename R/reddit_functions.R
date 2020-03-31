@@ -102,8 +102,10 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #' when accessing them. Possible values are:
 #' \itemize{
 #'   \item \code{new}: Sorts posts by the time when they were created
-#'   \item \code{hot}: Sorts posts by posts currently
-#'   \item \code{controversial}:
+#'   \item \code{hot}: Sorts posts by posts currently on the frontpage of the 
+#'   subreddit
+#'   \item \code{controversial}: Posts with a higher number of up- and downvotes
+#'   simultaneously.
 #'   \item \code{random}:
 #'   \item \code{rising}:
 #'   \item \code{top}: Most upvoted posts in a certain timeframe. Timeframe can
@@ -119,7 +121,8 @@ get_token <- function (scope = c("identity", "read", "history", "wikiread"),
 #'   \item \code{week}
 #'   \item \code{month}
 #'   \item \code{year}
-#'   \item \code{all time}
+#'   \item \code{all} for posts from all time. The default value if 
+#'   time is not specified.
 #' }
 #' @param before The fullname of a post serving as anchor in the request.
 #' Posts before this post in the listing are returned.
@@ -164,7 +167,7 @@ get_posts <- function(subreddit,
                       accesstoken,
                       sort ="new",
                       limit=100,
-                      time = NULL,
+                      time = c("all","hour", "day", "week", "month", "year"),
                       after = NULL,
                       before = NULL,
                       output = c("df","json", "all"),
@@ -176,10 +179,8 @@ get_posts <- function(subreddit,
   check_args(default_arg = "subreddit")
   
   output <- match.arg(output)
-  
-  if(!is.null(time)){
-    if(!time %in% c("hour", "day", "week", "month", "year", "all"))
-      stop("Time has to be one of these: hour, day, week, month, year, all")}
+
+  time <- match.arg(time)
   
   link <- build_link(path_elements = paste0("r/", subreddit, "/", sort),
                      query_elements = paste0("limit=", limit, "&t=", time),
@@ -220,7 +221,8 @@ get_posts <- function(subreddit,
 #'   \item \code{week}
 #'   \item \code{month}
 #'   \item \code{year}
-#'   \item \code{all time}
+#'   \item \code{all} for posts from all time. The default value if 
+#'   time is not specified.
 #' }
 #' @param limit The maximum number of submissions to return. Must be a number
 #' between 1 and 100.
@@ -260,8 +262,8 @@ get_posts <- function(subreddit,
 
 get_submissions <- function (user,
                              accesstoken,
-                             sort = "new",
-                             time = NULL,
+                             sort = c("new", "hot", "controversial", "top"),
+                             time = c("all","hour", "day", "week", "month", "year"),
                              limit = 100,
                              before = NULL,
                              after = NULL,
@@ -275,8 +277,9 @@ get_submissions <- function (user,
   
   output <- match.arg(output)
   
-  if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
-    stop("Time has to be one of these: hour, day, week, month, year, all")
+  time <- match.arg(time)
+  
+  sort <- match.arg(sort)
   
   link <- build_link(path_elements = paste0("user/", user, "/submitted"),
                      query_elements = paste0("limit=", limit,
@@ -430,8 +433,8 @@ get_comments <- function (subreddit,
 
 get_user_comments <- function (user,
                                accesstoken,
-                               sort = "new",
-                               time = NULL,
+                               sort = c("new", "hot", "controversial", "top"),
+                               time = c("all","hour", "day", "week", "month", "year"),
                                limit = 100,
                                after=NULL,
                                before=NULL,
@@ -445,8 +448,9 @@ get_user_comments <- function (user,
   
   output <- match.arg(output)
   
-  if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
-    stop("Time has to be one of these: hour, day, week, month, year, all")
+  time <- match.arg(time)
+  
+  sort <- match.arg(sort)
   
   link <- build_link(path_elements = paste0("user/", user,"/comments"),
                      query_elements = paste0("limit=",limit,
@@ -500,8 +504,8 @@ get_user_comments <- function (user,
 #'   \item \code{week}
 #'   \item \code{month}
 #'   \item \code{year}
-#'   \item \code{all} for items from day the user registered their account to
-#'   today.
+#'   \item \code{all} for posts or comments from all time. The default value if 
+#'   time is not specified.
 #' }
 #' @param limit The maximum number of items to return. Must be a number between
 #' 1 and 100.
@@ -566,8 +570,8 @@ get_user_comments <- function (user,
 get_user <- function (user,
                       accesstoken,
                       type = c("overview", "comments", "submitted", "gilded"),
-                      sort = "new",
-                      time = NULL,
+                      sort = c("new", "hot", "controversial", "top"),
+                      time = c("all","hour", "day", "week", "month", "year"),
                       limit = 100,
                       before=NULL,
                       after=NULL,
@@ -580,12 +584,9 @@ get_user <- function (user,
   check_args(default_arg = "user")
   
   output <- match.arg(output)
-  
-  if(!type %in% c("overview", "comments", "submitted", "gilded"))
-    stop("type has to be one of these: overview, comments, submitted, gilded")
-  
-  if(!is.null(time) & !time %in% c("hour", "day", "week", "month", "year", "all"))
-    stop("Time has to be one of these: hour, day, week, month, year, all")
+  type <- match.arg(type)
+  time <- match.arg(time)
+  sort <- match.arg(sort)
   
   link <- build_link(path_elements = paste0("user/", user,"/", type),
                      query_elements = paste0("limit=", limit, 
@@ -949,7 +950,7 @@ get_trophies <- function (user,
 get_subreddits <- function (type = c("popular", "new", "default", "search"),
                             accesstoken,
                             query = NULL,
-                            sort = NULL,
+                            sort = c("relevance", "activity"),
                             limit = 100,
                             after = NULL,
                             before = NULL,
@@ -1103,7 +1104,8 @@ get_users <- function(type = c("popular", "new"),
 #'   \item \code{week}
 #'   \item \code{month}
 #'   \item \code{year}
-#'   \item \code{all time}
+#'   \item \code{all} for search results from all time. The default value if 
+#'   time is not specified.
 #' }
 #' @param type The type of item to return. Must be \code{"link"} for posts, 
 #' \code{"user"} for "users or \code{"sr"} for subreddits. If it is NULL, it 
@@ -1159,7 +1161,7 @@ search_reddit <- function(query,
                           subreddit=NULL,
                           sort ="new",
                           limit=100,
-                          time = NULL,
+                          time = c("all","hour", "day", "week", "month", "year"),
                           type = c("link", "user", "sr"),
                           after=NULL,
                           before=NULL,
@@ -1172,6 +1174,8 @@ search_reddit <- function(query,
   check_args(default_arg = "query")
   
   output <- match.arg(output)
+  
+  time <- match.arg(time)
   
   if(!is.null(subreddit)){search_path <- paste0("r/", subreddit, "/search")}
   else{search_path <- paste0("search")}
@@ -1199,7 +1203,7 @@ search_reddit <- function(query,
 #'
 #' @param subreddit The subreddit of the thing
 #' @param id The unique id of the requested thing. Reddit IDs are in base 36.
-#' @param item_type What type of thing the id is. Must be \code{comment} or 
+#' @param type What type of thing the id is. Must be \code{comment} or 
 #' \code{post}.
 #' @param accesstoken The accesstoken required to access the endpoint. Scope
 #' must be \code{"read"}.
@@ -1241,7 +1245,7 @@ search_reddit <- function(query,
 
 get_thing <- function (subreddit,
                       id,
-                      item_type = c("comment", "post"),
+                      type = c("comment", "post"),
                       accesstoken = NULL,
                       output = c("df","json", "all"),
                       verbose = FALSE,
@@ -1254,12 +1258,12 @@ get_thing <- function (subreddit,
   
   output <- match.arg(output)
   
-  item_type <- match.arg(item_type)
+  type <- match.arg(type)
   
   if(grepl("^t[1-9]{1}_", id)){
     fullname <- id
   }else{
-    fullname <- ifelse(item_type == "comment", paste0("t1_", id),
+    fullname <- ifelse(type == "comment", paste0("t1_", id),
                        paste0("t3_", id)) 
   }
   

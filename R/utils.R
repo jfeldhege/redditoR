@@ -17,7 +17,7 @@ check_token <- function(token, scope){
   }else {
     if(is.null(token$useragent)) stop("No user agent was specified")
     
-    if(Sys.time() - token$access_time > 3600) stop("Token is expired")
+    if(Sys.time() - token$access_time > 3600) stop("Token has expired")
     
     if(token$scope != scope) stop(paste("This function requires", scope, "as scope of the token"))
   }
@@ -43,7 +43,7 @@ check_args <- function(default_arg = NULL){
   
   check_strings <- function(x, y){
     
-    string_args <- c("user", "subreddit", "time", "page", "sort", "after",
+    string_args <- c("user", "subreddit", "page", "after",
                      "before")
     
     if(y %in% string_args & !is.null(x)) {
@@ -249,6 +249,7 @@ parse_request <- function(request,
         if(any(is_df)){
           data <- data[[which(is_df)]]
         } else {
+          
           replace_null <- function(x) {
             lapply(x, function(x) {
               if (is.list(x)){
