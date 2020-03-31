@@ -7,8 +7,8 @@
 get_submissions(
   user,
   accesstoken,
-  sort = "new",
-  time = NULL,
+  sort = c("new", "hot", "controversial", "top"),
+  time = c("all", "hour", "day", "week", "month", "year"),
   limit = 100,
   before = NULL,
   after = NULL,
@@ -41,7 +41,8 @@ when accessing them. Possible values are:
   \item \code{week}
   \item \code{month}
   \item \code{year}
-  \item \code{all time}
+  \item \code{all} for posts from all time. The default value if 
+  time is not specified.
 }}
 
 \item{limit}{The maximum number of submissions to return. Must be a number

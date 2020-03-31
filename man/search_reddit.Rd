@@ -10,7 +10,7 @@ search_reddit(
   subreddit = NULL,
   sort = "new",
   limit = 100,
-  time = NULL,
+  time = c("all", "hour", "day", "week", "month", "year"),
   type = c("link", "user", "sr"),
   after = NULL,
   before = NULL,
@@ -50,7 +50,8 @@ values are:
   \item \code{week}
   \item \code{month}
   \item \code{year}
-  \item \code{all time}
+  \item \code{all} for search results from all time. The default value if 
+  time is not specified.
 }}
 
 \item{type}{The type of item to return. Must be \code{"link"} for posts, 

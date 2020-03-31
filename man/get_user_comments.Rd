@@ -7,8 +7,8 @@
 get_user_comments(
   user,
   accesstoken,
-  sort = "new",
-  time = NULL,
+  sort = c("new", "hot", "controversial", "top"),
+  time = c("all", "hour", "day", "week", "month", "year"),
   limit = 100,
   after = NULL,
   before = NULL,
@@ -42,7 +42,8 @@ when accessing them. Possible values are:
   \item \code{week}
   \item \code{month}
   \item \code{year}
-  \item \code{all time}
+  \item \code{all} for comments from all time. The default value if 
+  time is not specified.
 }}
 
 \item{limit}{The maximum number of user comments to return. Must be a number

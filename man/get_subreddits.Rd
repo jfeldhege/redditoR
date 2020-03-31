@@ -8,7 +8,7 @@ get_subreddits(
   type = c("popular", "new", "default", "search"),
   accesstoken,
   query = NULL,
-  sort = NULL,
+  sort = c("relevance", "activity"),
   limit = 100,
   after = NULL,
   before = NULL,

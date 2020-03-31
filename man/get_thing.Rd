@@ -7,7 +7,7 @@
 get_thing(
   subreddit,
   id,
-  item_type = c("comment", "post"),
+  type = c("comment", "post"),
   accesstoken = NULL,
   output = c("df", "json", "all"),
   verbose = FALSE,
@@ -19,7 +19,7 @@ get_thing(
 
 \item{id}{The unique id of the requested thing. Reddit IDs are in base 36.}
 
-\item{item_type}{What type of thing the id is. Must be \code{comment} or 
+\item{type}{What type of thing the id is. Must be \code{comment} or 
 \code{post}.}
 
 \item{accesstoken}{The accesstoken required to access the endpoint. Scope

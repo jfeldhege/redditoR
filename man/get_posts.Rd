@@ -9,7 +9,7 @@ get_posts(
   accesstoken,
   sort = "new",
   limit = 100,
-  time = NULL,
+  time = c("all", "hour", "day", "week", "month", "year"),
   after = NULL,
   before = NULL,
   output = c("df", "json", "all"),
@@ -27,8 +27,10 @@ must be \code{"read"}.}
 when accessing them. Possible values are:
 \itemize{
   \item \code{new}: Sorts posts by the time when they were created
-  \item \code{hot}: Sorts posts by posts currently
-  \item \code{controversial}:
+  \item \code{hot}: Sorts posts by posts currently on the frontpage of the 
+  subreddit
+  \item \code{controversial}: Posts with a higher number of up- and downvotes
+  simultaneously.
   \item \code{random}:
   \item \code{rising}:
   \item \code{top}: Most upvoted posts in a certain timeframe. Timeframe can
@@ -46,7 +48,8 @@ when accessing them. Possible values are:
   \item \code{week}
   \item \code{month}
   \item \code{year}
-  \item \code{all time}
+  \item \code{all} for posts from all time. The default value if 
+  time is not specified.
 }}
 
 \item{after}{The fullname of a post serving as anchor in the request.

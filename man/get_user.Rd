@@ -8,8 +8,8 @@ get_user(
   user,
   accesstoken,
   type = c("overview", "comments", "submitted", "gilded"),
-  sort = "new",
-  time = NULL,
+  sort = c("new", "hot", "controversial", "top"),
+  time = c("all", "hour", "day", "week", "month", "year"),
   limit = 100,
   before = NULL,
   after = NULL,
@@ -54,8 +54,8 @@ and \code{"top"}. Possible values are:
   \item \code{week}
   \item \code{month}
   \item \code{year}
-  \item \code{all} for items from day the user registered their account to
-  today.
+  \item \code{all} for posts or comments from all time. The default value if 
+  time is not specified.
 }}
 
 \item{limit}{The maximum number of items to return. Must be a number between
